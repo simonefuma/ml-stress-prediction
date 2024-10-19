@@ -1,25 +1,25 @@
 ID animals,target,body weight,sucrose intake,NOR index,locomotor activity,social interaction time,social events,0P (entries),CL (entries),% OP,tOP,tCL,tCENT,t%OP
-9,no stress,395,"12,5","0,36",119,127,33,7,4,64,160,67,73,53
-10,no stress,388,"10,4","0,43",185,160,34,4,7,36,58,170,72,19
-11,no stress,387,"16,3","0,52",156,114,26,10,6,63,156,65,79,52
-12,no stress,393,"21,1","0,28",89,137,32,5,9,36,108,121,71,36
-13,no stress,346,"11,4","0,40",94,87,25,6,8,43,130,109,61,43
-14,no stress,357,"13,8","0,19",91,131,32,8,5,62,129,115,56,43
-15,no stress,349,"12,7","0,37",101,174,33,6,5,55,103,139,58,34
-16,no stress,346,"23,5","0,55",89,193,21,9,4,69,183,70,47,61
-25,CMS (stress cronico) - vulnerabili,351,"7,6","0,17",78,88,25,5,4,56,109,88,103,36
-26,CMS (stress cronico) - vulnerabili,395,"3,8","-0,25",68,65,19,2,6,25,17,151,132,6
-27,CMS (stress cronico) - vulnerabili,395,"4,1","0,19",71,97,17,6,8,43,104,96,100,35
-28,CMS (stress cronico) - vulnerabili,369,"4,8","-0,16",122,112,24,5,12,29,63,112,125,21
-29,CMS (stress cronico) - vulnerabili,361,"3,4","-0,36",76,49,16,2,10,17,27,141,132,9
-30,CMS (stress cronico) - vulnerabili,356,"3,9","0,37",94,98,24,5,4,56,91,131,78,30
-31,CMS (stress cronico) - vulnerabili,375,"5,4","-0,19",91,88,22,3,7,30,52,141,107,17
-32,CMS (stress cronico) - vulnerabili,399,"5,8","0,06",95,92,21,3,8,27,41,121,138,14
-33,CMS (stress cronico) - resilienti,374,"11,7","0,03",94,103,23,4,6,40,60,109,131,20
-34,CMS (stress cronico) - resilienti,374,"11,6","0,27",92,62,26,3,6,33,52,153,95,17
-35,CMS (stress cronico) - resilienti,410,"17,5","-0,16",70,59,21,7,8,47,132,103,65,44
-36,CMS (stress cronico) - resilienti,377,"13,8","0,36",160,54,22,8,7,53,128,98,74,43
-37,CMS (stress cronico) - resilienti,381,"8,5","0,26",93,88,17,6,6,50,113,85,102,38
-38,CMS (stress cronico) - resilienti,366,"10,2","0,29",128,66,19,4,5,44,191,68,41,64
-39,CMS (stress cronico) - resilienti,311,"11,0","-0,12",85,80,24,4,7,36,80,116,104,27
-40,CMS (stress cronico) - resilienti,357,"9,6","0,71",77,107,20,5,2,71,106,110,84,35
+9,no stress,395,12.5,0.36,119,127,33,7,4,64,160,67,73,53
+10,no stress,388,10.4,0.43,185,160,34,4,7,36,58,170,72,19
+11,no stress,387,16.3,0.52,156,114,26,10,6,63,156,65,79,52
+12,no stress,393,21.1,0.28,89,137,32,5,9,36,108,121,71,36
+13,no stress,346,11.4,0.40,94,87,25,6,8,43,130,109,61,43
+14,no stress,357,13.8,0.19,91,131,32,8,5,62,129,115,56,43
+15,no stress,349,12.7,0.37,101,174,33,6,5,55,103,139,58,34
+16,no stress,346,23.5,0.55,89,193,21,9,4,69,183,70,47,61
+25,CMS (stress cronico) - vulnerabili,351,7.6,0.17,78,88,25,5,4,56,109,88,103,36
+26,CMS (stress cronico) - vulnerabili,395,3.8,-0.25,68,65,19,2,6,25,17,151,132,6
+27,CMS (stress cronico) - vulnerabili,395,4.1,0.19,71,97,17,6,8,43,104,96,100,35
+28,CMS (stress cronico) - vulnerabili,369,4.8,-0.16,122,112,24,5,12,29,63,112,125,21
+29,CMS (stress cronico) - vulnerabili,361,3.4,-0.36,76,49,16,2,10,17,27,141,132,9
+30,CMS (stress cronico) - vulnerabili,356,3.9,0.37,94,98,24,5,4,56,91,131,78,30
+31,CMS (stress cronico) - vulnerabili,375,5.4,-0.19,91,88,22,3,7,30,52,141,107,17
+32,CMS (stress cronico) - vulnerabili,399,5.8,0.06,95,92,21,3,8,27,41,121,138,14
+33,CMS (stress cronico) - resilienti,374,11.7,0.03,94,103,23,4,6,40,60,109,131,20
+34,CMS (stress cronico) - resilienti,374,11.6,0.27,92,62,26,3,6,33,52,153,95,17
+35,CMS (stress cronico) - resilienti,410,17.5,-0.16,70,59,21,7,8,47,132,103,65,44
+36,CMS (stress cronico) - resilienti,377,13.8,0.36,160,54,22,8,7,53,128,98,74,43
+37,CMS (stress cronico) - resilienti,381,8.5,0.26,93,88,17,6,6,50,113,85,102,38
+38,CMS (stress cronico) - resilienti,366,10.2,0.29,128,66,19,4,5,44,191,68,41,64
+39,CMS (stress cronico) - resilienti,311,11.0,-0.12,85,80,24,4,7,36,80,116,104,27
+40,CMS (stress cronico) - resilienti,357,9.6,0.71,77,107,20,5,2,71,106,110,84,35
