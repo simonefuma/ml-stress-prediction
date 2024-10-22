@@ -24,7 +24,7 @@ y = df['target']
 # +
 # Boxplot per ogni attributo del dataset
 plt.figure(figsize=(12, 6))
-plt.boxplot(X.values, labels=X.columns, vert=False)
+plt.boxplot(X.values, tick_labels=X.columns, vert=False)
 
 plt.title('Boxplot per ogni attributo')
 plt.show()
@@ -284,5 +284,7 @@ learn(X.values, y.values, model, param_grid,
       val_scorer=metrics.accuracy_score, minimize_val_scorer=False,
       test_scorer=metrics.accuracy_score, minimize_test_scorer=False)
 # -
+
+
 
 
