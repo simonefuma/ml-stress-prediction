@@ -8,11 +8,7 @@ import sklearn.metrics as metrics
 from sklearn.neighbors import KNeighborsClassifier
 # -
 
-# Leggo il file cv ed converto i numeri con la virgola da string a float
-data_file_name = 'data.csv'
-df = pd.read_csv(data_file_name, index_col='ID animals')
-df['sucrose intake'] = df['sucrose intake'].replace(',', '.').astype(float)
-df['NOR index'] = df['NOR index'].replace(',', '.').astype(float)
+df = pd.read_csv('data.csv', index_col='ID animals', dtype={'sucrose intake': 'float64', 'NOR index': 'float64'})
 # per il momento lavoro sul caso binario 'no stress' ed 'CMS (stress cronico)'
 df['target'] = pd.factorize(df['target'].str.split(" - ").str[0])[0]
 df
