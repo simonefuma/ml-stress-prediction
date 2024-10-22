@@ -4,3 +4,4 @@ notebook
 numpy
 pandas
 scikit-learn
+seaborn
