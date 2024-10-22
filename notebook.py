@@ -3,6 +3,7 @@ import itertools as it
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import seaborn as sns
 
 import sklearn.metrics as metrics
 from sklearn.neighbors import KNeighborsClassifier
@@ -24,11 +25,31 @@ plt.boxplot(X.values, tick_labels=X.columns, vert=False)
 
 plt.title('Boxplot per ogni attributo')
 plt.show()
+
+# +
+correlation_matrix = df.corr()
+
+plt.figure(figsize=(9, 8))
+
+sns.heatmap(
+    correlation_matrix,
+    annot=True,
+    fmt=".2f",
+    cmap='coolwarm',
+    square=True,
+    cbar_kws={"shrink": .8},
+    linewidths=0.5,
+    linecolor='black',
+    xticklabels=correlation_matrix.columns,
+    yticklabels=correlation_matrix.index
+)
+
+plt.title('Matrice di Correlazione', fontsize=18)
+plt.xticks(rotation=45, ha='right')
+plt.show()
+
+
 # -
-
-# matrice delle correlazioni degli attributi ( presente anche la correlazione tra etichetta e attributi )
-df.corr()
-
 
 def make_hp_configurations(grid):
     """
