@@ -18,6 +18,21 @@ df
 X = df.drop(columns=['target'])
 y = df['target']
 
+# Ottengo le righe che hanno campi vuoti
+X[X.isnull().any(axis=1)]
+
+# Ottengo le coppie di righe uguali
+[(i, j) for i, j in list(it.combinations(X.index, 2)) if X.loc[i].equals(X.loc[j])]
+
+# Ottengo le colonne che hanno campi vuoti
+X.loc[:, X.isnull().any()]
+
+# Ottengo le coppie di colonne uguali
+[(i, j) for i, j in list(it.combinations(X.columns, 2)) if X[i].equals(X[j])]
+
+# Ottengo le colonne costanti
+X.columns[X.nunique() == 1]
+
 # +
 # Boxplot per ogni attributo del dataset
 plt.figure(figsize=(12, 6))
@@ -27,6 +42,7 @@ plt.title('Boxplot per ogni attributo')
 plt.show()
 
 # +
+# Matrice di correlazione con heatmap
 correlation_matrix = df.corr()
 
 plt.figure(figsize=(9, 8))
