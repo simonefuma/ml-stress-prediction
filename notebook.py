@@ -7,6 +7,9 @@ import seaborn as sns
 
 import sklearn.metrics as metrics
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.model_selection import StratifiedKFold
 # -
 
 df = pd.read_csv('data.csv', index_col='ID animals', dtype={'sucrose intake': 'float64', 'NOR index': 'float64'})
@@ -88,13 +91,12 @@ def learn(X, y, estimator, param_grid, outer_split_method, inner_split_method,
             val_scorer=metrics.root_mean_squared_error, minimize_val_scorer=True, 
             test_scorers=[metrics.root_mean_squared_error]):
     outer_scores = []
+    best_inner_score = np.inf if minimize_val_scorer else -np.inf
     best_conf = None
 
     for trainval_index, test_index in outer_split_method.split(X, y):
         X_trainval, X_test = X[trainval_index], X[test_index]
         y_trainval, y_test = y[trainval_index], y[test_index]
-        
-        best_inner_score = np.inf if minimize_val_scorer else -np.inf
         
         for hp_conf in make_hp_configurations(param_grid):
             conf_scores = []
@@ -120,23 +122,22 @@ def learn(X, y, estimator, param_grid, outer_split_method, inner_split_method,
 
 
 # +
-from sklearn.model_selection import StratifiedKFold
+pipe = Pipeline(steps=[
+    ('scaler', _),
+    ('classifier', KNeighborsClassifier())
+])
 
 param_grid = {
-    'n_neighbors': [k for k in range(1, 12, 2)], # capire quale massimo usare
-    'metric': #[metric for metric in pairwise.distance_metrics()] # aclune metriche non vanno bene
-    ['cityblock', 'cosine', 'euclidean', 'l2', 'l1', 'manhattan', 'nan_euclidean']
+    'scaler': [StandardScaler(), MinMaxScaler()],
+    'classifier__n_neighbors': [k for k in range(1, 12, 2)],
+    'classifier__metric': ['cityblock', 'cosine', 'euclidean', 'l2', 'l1', 'manhattan', 'nan_euclidean']
+    #[metric for metric in pairwise.distance_metrics()] # aclune metriche non vanno bene
 }
-model = KNeighborsClassifier()
 
-learn(X.values, y.values, model, param_grid, 
+# la scelta della configurazione migliore dipende dalla prima che arriva con lo score massimo
+learn(X.values, y.values, pipe, param_grid, 
       StratifiedKFold(n_splits=4, shuffle=True, random_state=42), 
       StratifiedKFold(n_splits=3, shuffle=True, random_state=42), 
       val_scorer=metrics.accuracy_score, 
       minimize_val_scorer=False,
       test_scorers=[metrics.accuracy_score, metrics.f1_score])
-# -
-
-
-
-
