@@ -116,7 +116,7 @@ def learn(X, y, estimator, param_grid, outer_split_method, inner_split_method,
     avg = np.mean(outer_scores, axis=0)
     std = np.std(outer_scores, axis=0, ddof=1)
     fit_estimator(X, y, estimator, best_conf)
-    return estimator, {test_scorer.__name__: {'avg':avg[i], 'std':std[i]} for i, test_scorer in enumerate(test_scorers)}
+    return estimator, [{'scorer name':test_scorer.__name__, 'avg':avg[i], 'std':std[i]} for i, test_scorer in enumerate(test_scorers)]
 
 
 # +
