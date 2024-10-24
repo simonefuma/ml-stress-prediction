@@ -91,12 +91,13 @@ def learn(X, y, estimator, param_grid, outer_split_method, inner_split_method,
             val_scorer=metrics.root_mean_squared_error, minimize_val_scorer=True, 
             test_scorers=[metrics.root_mean_squared_error]):
     outer_scores = []
-    best_inner_score = np.inf if minimize_val_scorer else -np.inf
     best_conf = None
 
     for trainval_index, test_index in outer_split_method.split(X, y):
         X_trainval, X_test = X[trainval_index], X[test_index]
         y_trainval, y_test = y[trainval_index], y[test_index]
+
+        best_inner_score = np.inf if minimize_val_scorer else -np.inf
         
         for hp_conf in make_hp_configurations(param_grid):
             conf_scores = []
