@@ -7,7 +7,7 @@ Assicurati di avere installato **Python3** puoi controllare la tua versione usan
 ```
 python3 --version
 ```
-Se non è installato puoi installarlo dal sito ufficiale: (https://www.python.org/downloads)
+Se non è installato puoi installarlo dal sito ufficiale: <a href="https://www.python.org/downloads/" target="_blank">Python Download</a>.
 
 ## Setup dell'ambiente virtuale
 
