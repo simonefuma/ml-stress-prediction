@@ -134,10 +134,21 @@ param_grid = {
     #[metric for metric in pairwise.distance_metrics()] # aclune metriche non vanno bene
 }
 
+specificity_scorer = lambda y_true, y_pred: metrics.recall_score(y_true, y_pred, pos_label=0)
+specificity_scorer.__name__ = "specificity_scorer"
+
 # la scelta della configurazione migliore dipende dalla prima che arriva con lo score massimo
-learn(X.values, y.values, pipe, param_grid, 
-      StratifiedKFold(n_splits=4, shuffle=True, random_state=42), 
-      StratifiedKFold(n_splits=3, shuffle=True, random_state=42), 
-      val_scorer=metrics.accuracy_score, 
+learn(X.values, y.values, pipe, param_grid,
+      StratifiedKFold(n_splits=4, shuffle=True, random_state=42),
+      StratifiedKFold(n_splits=3, shuffle=True, random_state=42),
+      val_scorer=metrics.accuracy_score,
       minimize_val_scorer=False,
-      test_scorers=[metrics.accuracy_score, metrics.f1_score])
+      test_scorers=[
+          metrics.accuracy_score, 
+          metrics.f1_score, 
+          metrics.precision_score, 
+          metrics.recall_score, 
+          specificity_scorer
+      ])
+# -
+
