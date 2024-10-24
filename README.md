@@ -11,6 +11,26 @@ Se non è installato puoi installarlo dal sito ufficiale: <a href="https://www.p
 
 ## Setup dell'ambiente virtuale
 
+Per configurare l'ambiente del progetto, hai due opzioni:
+
+### Opzione 1: Eseguire lo Script di Setup
+
+Puoi eseguire uno script di setup che configura automaticamente l'ambiente virtuale e installa tutte le dipendenze necessarie. Esegui il seguente comando:
+
+- **MacOS/Linux:**
+
+Per renderlo eseguibile:
+```
+chmod +x setup.sh
+```
+Per Lanciarlo:
+```
+./setup.sh
+```
+### Opzione 2: Setup Manuale
+
+- **MacOS/Linux:**
+
 Utilizza il modulo `venv` integrato in Python3 per creare l'ambiente virtuale. Da dentro la cartella del progetto, esegui il seguente comando:
 ```
 python3 -m venv .venv --promt ml-stress-prediction
