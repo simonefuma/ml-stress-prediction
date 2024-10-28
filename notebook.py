@@ -7,6 +7,7 @@ import seaborn as sns
 
 import sklearn.metrics as metrics
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.model_selection import StratifiedKFold
@@ -112,7 +113,7 @@ def learn(X, y, estimator, param_grid, outer_split_method, inner_split_method,
             conf_score = np.mean(conf_scores)
             if check_best(minimize_val_scorer, conf_score, best_inner_score):
                 best_inner_score, best_conf = conf_score, hp_conf
-        
+                
         fit_estimator(X_trainval, y_trainval, estimator, best_conf)
         outer_scores.append([get_score(X_test, y_test, estimator, test_scorer) for test_scorer in test_scorers])
 
@@ -122,34 +123,67 @@ def learn(X, y, estimator, param_grid, outer_split_method, inner_split_method,
     return estimator, [{'scorer name':test_scorer.__name__, 'avg':avg[i], 'std':std[i]} for i, test_scorer in enumerate(test_scorers)]
 
 
-# +
-pipe = Pipeline(steps=[
-    ('scaler', _),
-    ('classifier', KNeighborsClassifier())
-])
+def learn_models(X, y, models, test_scorers):
+    results = []
+    
+    for model in models:
+        pipe = Pipeline(steps=[
+            ('scaler', _),
+            ('classifier', model['model'])
+        ])
 
-param_grid = {
-    'scaler': [StandardScaler(), MinMaxScaler()],
-    'classifier__n_neighbors': [k for k in range(1, 12, 2)],
-    'classifier__metric': ['cityblock', 'cosine', 'euclidean', 'l2', 'l1', 'manhattan', 'nan_euclidean']
-    #[metric for metric in pairwise.distance_metrics()] # aclune metriche non vanno bene
-}
+        param_grid = ({'scaler': [StandardScaler(), MinMaxScaler()]} |
+                     {'classifier__'+key: value for key, value in model['param_grid'].items()})
+
+        results.append({
+            'model': model['model'].__class__.__name__,
+            'result': learn(X, y, pipe, param_grid,
+                            StratifiedKFold(n_splits=4, shuffle=True, random_state=42),
+                            StratifiedKFold(n_splits=3, shuffle=True, random_state=42),
+                            val_scorer=metrics.accuracy_score,
+                            minimize_val_scorer=False,
+                            test_scorers=test_scorers
+                           )        
+        })
+
+    return results
+
+
+# +
+models = [
+    {
+        'model': KNeighborsClassifier(),
+        'param_grid': 
+        {
+            'n_neighbors': [k for k in range(1, 12, 2)],
+            'metric': ['cityblock', 'cosine', 'euclidean', 'l2', 'l1', 'manhattan', 'nan_euclidean']
+        }
+    },
+    {
+        'model': SVC(),
+        'param_grid':
+        {
+            'C': [0.01, 0.1, 1, 10, 100],
+            'kernel': ['linear', 'poly', 'rbf', 'sigmoid'],
+            'degree': [2, 3, 4, 5],
+            'gamma': ['scale', 'auto', 0.001, 0.01, 0.1, 1],
+            'coef0': [0.0, 0.5, 1.0]
+        }
+    }
+]
+
 
 specificity_scorer = lambda y_true, y_pred: metrics.recall_score(y_true, y_pred, pos_label=0)
 specificity_scorer.__name__ = "specificity_scorer"
 
-# la scelta della configurazione migliore dipende dalla prima che arriva con lo score massimo
-learn(X.values, y.values, pipe, param_grid,
-      StratifiedKFold(n_splits=4, shuffle=True, random_state=42),
-      StratifiedKFold(n_splits=3, shuffle=True, random_state=42),
-      val_scorer=metrics.accuracy_score,
-      minimize_val_scorer=False,
-      test_scorers=[
-          metrics.accuracy_score, 
-          metrics.f1_score, 
-          metrics.precision_score, 
-          metrics.recall_score, 
-          specificity_scorer
-      ])
+test_scorers = [
+    metrics.accuracy_score, 
+    metrics.f1_score, 
+    metrics.precision_score, 
+    metrics.recall_score, 
+    specificity_scorer
+]
+learn_models(X.values, y.values, models, test_scorers)
 # -
+
 
