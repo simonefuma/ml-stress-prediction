@@ -13,6 +13,7 @@ import json
 import logging
 import pickle
 
+from matplotlib.colors import ListedColormap
 import sklearn.metrics as metrics
 from sklearn.decomposition import PCA
 from sklearn.neighbors import KNeighborsClassifier
@@ -20,6 +21,7 @@ from sklearn.svm import SVC
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.model_selection import StratifiedKFold
+from sklearn.cluster import KMeans
 # -
 
 df = pd.read_csv('data.csv', index_col='ID animals', dtype={'sucrose intake': 'float64', 'NOR index': 'float64'})
@@ -52,6 +54,12 @@ plt.show()
 
 # -
 
+def lighten_color(color, amount=0.5):
+    """Funzione per schiarire un colore."""
+    color_rgb = np.array(to_rgb(color))
+    return tuple(np.clip(color_rgb + (1 - color_rgb) * amount, 0, 1))
+
+
 def show_correlation_matrix(df, title):
     correlation_matrix = df.corr()
 
@@ -77,13 +85,36 @@ def show_correlation_matrix(df, title):
 
 def show_scatter_plot(X_2d, y, title):
     plt.figure(figsize=(8, 6))
-    scatter = plt.scatter(X_2d[:, 0], X_2d[:, 1], c=y, cmap='Paired', edgecolor='k', s=150)
+    plt.scatter(X_2d[:, 0], X_2d[:, 1], c=y, cmap='Paired', edgecolor='k', s=150)
     
     plt.title(title)
     plt.xlabel('PCA Component 1')
     plt.ylabel('PCA Component 2')
     
-    plt.grid()
+    plt.show()
+
+
+def show_cluster_plot(k, X, y, colors, title):
+    kmeans = KMeans(n_clusters=k, random_state=42)
+    predicts = kmeans.fit_predict(X)
+    centroids = kmeans.cluster_centers_;
+
+    x_min, x_max = X[:, 0].min() - 5, X[:, 0].max() + 5
+    y_min, y_max = X[:, 1].min() - 5, X[:, 1].max() + 5
+    xx, yy = np.meshgrid(np.linspace(x_min, x_max, 1000), np.linspace(y_min, y_max, 1000))
+    Z = kmeans.predict(np.c_[xx.ravel(), yy.ravel()])
+    Z = Z.reshape(xx.shape)
+
+    plt.figure(figsize=(8, 6))
+    plt.contourf(xx, yy, Z, cmap=ListedColormap([lighten_color(color) for color in colors]), alpha=0.3)
+    plt.xlim(x_min, x_max)
+    plt.ylim(y_min, y_max)
+    
+    plt.scatter(X[:, 0], X[:, 1], c=y, cmap=ListedColormap(colors), edgecolor='k', s=150)
+
+    plt.scatter(centroids[:, 0], centroids[:, 1], c='k', marker='.', edgecolor='k', s=150)
+
+    plt.title(title)
     plt.show()
 
 
@@ -107,21 +138,25 @@ pca.fit(X)
 explained_variance = np.cumsum(pca.explained_variance_ratio_)
 
 plt.figure(figsize=(8, 5))
+plt.grid()
 plt.plot(range(1, len(explained_variance) + 1), explained_variance, marker='o')
 plt.title('Cumulative Explained Variance')
 plt.xlabel('Number of Components')
 plt.ylabel('Cumulative Explained Variance')
 plt.xticks(range(1, len(explained_variance) + 1))
-plt.grid()
 plt.axhline(y=0.9, color='r', linestyle='--')
 plt.show()
 # -
 
-#print(X_2d[[4]]) questo è il punto dei positivi che sta insieme ai negativi
 pca_2d = PCA(n_components=2)
 X_2d = pca_2d.fit_transform(X)
+
+#print(X_2d[[4]]) questo è il punto dei positivi che sta insieme ai negativi
 show_scatter_plot(X_2d, y_2, 'PCA - Scatter Plot (df_2)')
 show_scatter_plot(X_2d, y_3, 'PCA - Scatter Plot (df_3)')
+
+show_cluster_plot(2, X_2d, y_2, ['b', 'm'], 'Cluster Plot (df_2)')
+show_cluster_plot(3, X_2d, y_3, ['b', 'm', 'g'], 'Cluster Plot (df_3)')
 
 
 def display_table(title, data):
