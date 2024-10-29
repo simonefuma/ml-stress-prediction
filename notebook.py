@@ -54,12 +54,6 @@ plt.show()
 
 # -
 
-def lighten_color(color, amount=0.5):
-    """Funzione per schiarire un colore."""
-    color_rgb = np.array(to_rgb(color))
-    return tuple(np.clip(color_rgb + (1 - color_rgb) * amount, 0, 1))
-
-
 def show_correlation_matrix(df, title):
     correlation_matrix = df.corr()
 
@@ -114,9 +108,10 @@ def show_cluster_plot(k, X, y, y_text, colors, title):
     xx, yy = np.meshgrid(np.linspace(x_min, x_max, 1000), np.linspace(y_min, y_max, 1000))
     Z = kmeans.predict(np.c_[xx.ravel(), yy.ravel()])
     Z = Z.reshape(xx.shape)
-
+    
+    cmap = ListedColormap(colors)
     plt.figure(figsize=(8, 6))
-    plt.contourf(xx, yy, Z, cmap=ListedColormap([lighten_color(color) for color in colors]), alpha=0.3)
+    plt.contourf(xx, yy, Z, cmap=cmap, alpha=0.3)
     plt.xlim(x_min, x_max)
     plt.ylim(y_min, y_max)
 
@@ -135,7 +130,7 @@ def show_cluster_plot(k, X, y, y_text, colors, title):
                                markersize=10)
                        )
     
-    plt.scatter(X[:, 0], X[:, 1], c=y, cmap=ListedColormap(colors), edgecolor='k', s=150)
+    plt.scatter(X[:, 0], X[:, 1], c=y, cmap=cmap, edgecolor='k', s=150)
 
     plt.scatter(centroids[:, 0], centroids[:, 1], c='k', marker='.', edgecolor='k', s=150)
     plt.legend(handles=custom_lines)
