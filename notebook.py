@@ -14,6 +14,7 @@ import logging
 import pickle
 
 import sklearn.metrics as metrics
+from sklearn.decomposition import PCA
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.pipeline import Pipeline
@@ -22,62 +23,88 @@ from sklearn.model_selection import StratifiedKFold
 # -
 
 df = pd.read_csv('data.csv', index_col='ID animals', dtype={'sucrose intake': 'float64', 'NOR index': 'float64'})
-# per il momento lavoro sul caso binario 'no stress' ed 'CMS (stress cronico)'
-df['target'] = pd.factorize(df['target'].str.split(" - ").str[0])[0]
+X = df.drop(columns=['target'])
 df
 
-# Ottengo le coppie (X, y)
-X = df.drop(columns=['target'])
-y = df['target']
-
 # Ottengo le righe che hanno campi vuoti
-X[X.isnull().any(axis=1)]
+df[df.isnull().any(axis=1)]
 
 # Ottengo le coppie di righe uguali
-[(i, j) for i, j in list(it.combinations(X.index, 2)) if X.loc[i].equals(X.loc[j])]
+[(i, j) for i, j in list(it.combinations(df.index, 2)) if df.loc[i].equals(df.loc[j])]
 
 # Ottengo le colonne che hanno campi vuoti
-X.loc[:, X.isnull().any()]
+df.loc[:, df.isnull().any()]
 
 # Ottengo le coppie di colonne uguali
-[(i, j) for i, j in list(it.combinations(X.columns, 2)) if X[i].equals(X[j])]
+[(i, j) for i, j in list(it.combinations(df.columns, 2)) if df[i].equals(df[j])]
 
 # Ottengo le colonne costanti
-X.columns[X.nunique() == 1]
+df.columns[df.nunique() == 1]
 
 # +
 # Boxplot per ogni attributo del dataset
 plt.figure(figsize=(12, 6))
-plt.boxplot(X.values, tick_labels=X.columns, vert=False)
+plt.boxplot(df.drop(columns=['target']).values, tick_labels=df.drop(columns=['target']).columns, vert=False)
 
 plt.title('Boxplot per ogni attributo')
 plt.show()
 
-# +
-# Matrice di correlazione con heatmap
-correlation_matrix = df.corr()
-
-plt.figure(figsize=(9, 8))
-
-sns.heatmap(
-    correlation_matrix,
-    annot=True,
-    fmt=".2f",
-    cmap='coolwarm',
-    square=True,
-    cbar_kws={"shrink": .8},
-    linewidths=0.5,
-    linecolor='black',
-    xticklabels=correlation_matrix.columns,
-    yticklabels=correlation_matrix.index
-)
-
-plt.title('Matrice di Correlazione', fontsize=18)
-plt.xticks(rotation=45, ha='right')
-plt.show()
-
 
 # -
+
+def show_correlation_matrix(df, title):
+    correlation_matrix = df.corr()
+
+    plt.figure(figsize=(9, 8))
+    
+    sns.heatmap(
+        correlation_matrix,
+        annot=True,
+        fmt=".2f",
+        cmap='coolwarm',
+        square=True,
+        cbar_kws={"shrink": .8},
+        linewidths=0.5,
+        linecolor='black',
+        xticklabels=correlation_matrix.columns,
+        yticklabels=correlation_matrix.index
+    )
+    
+    plt.title(title, fontsize=18)
+    plt.xticks(rotation=45, ha='right')
+    plt.show()
+
+
+def show_scatter_plot(y, title):
+    plt.figure(figsize=(8, 6))
+    scatter = plt.scatter(X_2d[:, 0], X_2d[:, 1], c=y, cmap='Paired', edgecolor='k', s=150)
+    
+    plt.title(title)
+    plt.xlabel('PCA Component 1')
+    plt.ylabel('PCA Component 2')
+    
+    plt.grid()
+    plt.show()
+
+
+# +
+df_2 = copy.copy(df)
+df_2['target'] = pd.factorize(df['target'].str.split(' - ').str[0])[0]
+y_2 = df_2['target']
+
+df_3 = copy.copy(df)
+df_3['target'] = pd.factorize(df['target'])[0]
+y_3 = df_3['target']
+# -
+
+show_correlation_matrix(df_2, 'Matrice di Correlazione (df_2)')
+show_correlation_matrix(df_3, 'Matrice di Correlazione (df_3)')
+
+pca_2d = PCA(n_components=2)
+X_2d = pca_2d.fit_transform(X)
+show_scatter_plot(y_2, 'PCA - Scatter Plot (df_2)')
+show_scatter_plot(y_3, 'PCA - Scatter Plot (df_3)')
+
 
 def display_table(title, data):
     print('\n' * 1)
@@ -85,7 +112,7 @@ def display_table(title, data):
     table[['avg', 'std']] = table[['avg', 'std']].round(3)
     table.set_index('scorer_name', inplace=True)
     print(title)
-    print('-' * 30)
+    print('-' * 27)
     display(table)
 
 
@@ -260,7 +287,7 @@ test_scorers = [
     metrics.recall_score, 
     specificity_scorer
 ]
-learned_models = learn_models(X.values, y.values, models, test_scorers, False, 2)
+learned_models = learn_models(X.values, y_2.values, models, test_scorers, False, 2)
 for learned_model in learned_models:
     display_table(learned_model['model_name'], learned_model['result'])
 # -
