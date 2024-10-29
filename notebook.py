@@ -79,6 +79,16 @@ plt.show()
 
 # -
 
+def display_table(title, data):
+    print('\n' * 1)
+    table = pd.DataFrame(data)
+    table[['avg', 'std']] = table[['avg', 'std']].round(3)
+    table.set_index('scorer_name', inplace=True)
+    print(title)
+    print('-' * 30)
+    display(table)
+
+
 def np_jsonify(data):
     """Recursively replaces np.float64 instances with float in a nested dictionary."""
     data = copy.deepcopy(data)
@@ -156,7 +166,7 @@ def learn_parallel(X, y, estimator, param_grid, outer_split_method, inner_split_
     avg = np.mean(outer_scores, axis=0)
     std = np.std(outer_scores, axis=0, ddof=1)
     fit_estimator(X, y, estimator, best_conf)
-    return estimator, [{'scorer name':test_scorer.__name__, 'avg':avg[i], 'std':std[i]} for i, test_scorer in enumerate(test_scorers)]
+    return estimator, [{'scorer_name':test_scorer.__name__, 'avg':avg[i], 'std':std[i]} for i, test_scorer in enumerate(test_scorers)]
 
 
 def learn_models(X, y, models, test_scorers, minimize_test_scorer, index_test_scorer):
@@ -250,7 +260,9 @@ test_scorers = [
     metrics.recall_score, 
     specificity_scorer
 ]
-learn_models(X.values, y.values, models, test_scorers, False, 2)
+learned_models = learn_models(X.values, y.values, models, test_scorers, False, 2)
+for learned_model in learned_models:
+    display_table(learned_model['model_name'], learned_model['result'])
 # -
 
 
