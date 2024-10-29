@@ -90,8 +90,10 @@ def check_best(minimize, score, best_score):
 
 def learn(X, y, estimator, param_grid, outer_split_method, inner_split_method,
             val_scorer=metrics.root_mean_squared_error, minimize_val_scorer=True, 
-            test_scorers=[metrics.root_mean_squared_error]):
+            test_scorers=[metrics.root_mean_squared_error], minimize_test_scorer=True, index_test_scorer=0):
     outer_scores = []
+
+    best_score = np.inf if minimize_test_scorer else -np.inf
     best_conf = None
 
     for trainval_index, test_index in outer_split_method.split(X, y):
@@ -99,6 +101,7 @@ def learn(X, y, estimator, param_grid, outer_split_method, inner_split_method,
         y_trainval, y_test = y[trainval_index], y[test_index]
 
         best_inner_score = np.inf if minimize_val_scorer else -np.inf
+        best_inner_conf = None
         
         for hp_conf in make_hp_configurations(param_grid):
             conf_scores = []
@@ -112,10 +115,12 @@ def learn(X, y, estimator, param_grid, outer_split_method, inner_split_method,
             
             conf_score = np.mean(conf_scores)
             if check_best(minimize_val_scorer, conf_score, best_inner_score):
-                best_inner_score, best_conf = conf_score, hp_conf
+                best_inner_score, best_inner_conf = conf_score, hp_conf
                 
-        fit_estimator(X_trainval, y_trainval, estimator, best_conf)
+        fit_estimator(X_trainval, y_trainval, estimator, best_inner_conf)
         outer_scores.append([get_score(X_test, y_test, estimator, test_scorer) for test_scorer in test_scorers])
+        if check_best(minimize_test_scorer, outer_scores[-1][index_test_scorer], best_score):
+            best_score, best_conf = outer_scores[-1][index_test_scorer], best_inner_conf
 
     avg = np.mean(outer_scores, axis=0)
     std = np.std(outer_scores, axis=0, ddof=1)
@@ -123,7 +128,7 @@ def learn(X, y, estimator, param_grid, outer_split_method, inner_split_method,
     return estimator, [{'scorer name':test_scorer.__name__, 'avg':avg[i], 'std':std[i]} for i, test_scorer in enumerate(test_scorers)]
 
 
-def learn_models(X, y, models, test_scorers):
+def learn_models(X, y, models, test_scorers, minimize_test_scorer, index_test_scorer):
     results = []
     
     for model in models:
@@ -142,7 +147,9 @@ def learn_models(X, y, models, test_scorers):
                             StratifiedKFold(n_splits=3, shuffle=True, random_state=42),
                             val_scorer=metrics.accuracy_score,
                             minimize_val_scorer=False,
-                            test_scorers=test_scorers
+                            test_scorers=test_scorers,
+                            minimize_test_scorer=minimize_test_scorer,
+                            index_test_scorer=index_test_scorer
                            )        
         })
 
@@ -182,7 +189,7 @@ test_scorers = [
     metrics.recall_score, 
     specificity_scorer
 ]
-learn_models(X.values, y.values, models, test_scorers)
+learn_models(X.values, y.values, models, test_scorers, False, 2)
 # -
 
 
