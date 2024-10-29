@@ -83,18 +83,28 @@ def show_correlation_matrix(df, title):
     plt.show()
 
 
-def show_scatter_plot(X_2d, y, title):
+def show_scatter_plot(X, y, y_text, colors, title):
     plt.figure(figsize=(8, 6))
-    plt.scatter(X_2d[:, 0], X_2d[:, 1], c=y, cmap='Paired', edgecolor='k', s=150)
     
+    plt.scatter(X[:, 0], X[:, 1], c=y, cmap=ListedColormap(colors), edgecolor='k', s=150)
+
+    custom_lines = [plt.Line2D([0], [0], 
+                               marker='o', 
+                               color='w', 
+                               label=y_text[i], 
+                               markerfacecolor=colors[i], 
+                               markersize=10) 
+                    for i in range(len(y_text))]
+
+    plt.legend(handles=custom_lines)
     plt.title(title)
     plt.xlabel('PCA Component 1')
     plt.ylabel('PCA Component 2')
-    
+    plt.legend(handles=custom_lines)
     plt.show()
 
 
-def show_cluster_plot(k, X, y, colors, title):
+def show_cluster_plot(k, X, y, y_text, colors, title):
     kmeans = KMeans(n_clusters=k, random_state=42)
     predicts = kmeans.fit_predict(X)
     centroids = kmeans.cluster_centers_;
@@ -109,11 +119,26 @@ def show_cluster_plot(k, X, y, colors, title):
     plt.contourf(xx, yy, Z, cmap=ListedColormap([lighten_color(color) for color in colors]), alpha=0.3)
     plt.xlim(x_min, x_max)
     plt.ylim(y_min, y_max)
+
+    custom_lines = [plt.Line2D([0], [0], 
+                               marker='o', 
+                               color='w', 
+                               label=y_text[i], 
+                               markerfacecolor=colors[i], 
+                               markersize=10) 
+                    for i in range(len(y_text))]
+    custom_lines.append(plt.Line2D([0], [0], 
+                               marker='.', 
+                               color='w', 
+                               label='Centroids', 
+                               markerfacecolor='k', 
+                               markersize=10)
+                       )
     
     plt.scatter(X[:, 0], X[:, 1], c=y, cmap=ListedColormap(colors), edgecolor='k', s=150)
 
     plt.scatter(centroids[:, 0], centroids[:, 1], c='k', marker='.', edgecolor='k', s=150)
-
+    plt.legend(handles=custom_lines)
     plt.title(title)
     plt.show()
 
@@ -121,11 +146,13 @@ def show_cluster_plot(k, X, y, colors, title):
 # +
 df_2 = copy.copy(df)
 df_2['target'] = pd.factorize(df['target'].str.split(' - ').str[0])[0]
+y_unique_text_2 = df['target'].str.split(' - ').str[0].unique()
 y_2 = df_2['target']
 
 df_3 = copy.copy(df)
 df_3['target'] = pd.factorize(df['target'])[0]
 y_3 = df_3['target']
+y_unique_text_3 = df['target'].unique()
 # -
 
 show_correlation_matrix(df_2, 'Matrice di Correlazione (df_2)')
@@ -138,25 +165,24 @@ pca.fit(X)
 explained_variance = np.cumsum(pca.explained_variance_ratio_)
 
 plt.figure(figsize=(8, 5))
-plt.grid()
 plt.plot(range(1, len(explained_variance) + 1), explained_variance, marker='o')
+plt.xticks(range(1, len(explained_variance) + 1))
+plt.axhline(y=0.9, color='r', linestyle='--')
 plt.title('Cumulative Explained Variance')
 plt.xlabel('Number of Components')
 plt.ylabel('Cumulative Explained Variance')
-plt.xticks(range(1, len(explained_variance) + 1))
-plt.axhline(y=0.9, color='r', linestyle='--')
+plt.grid()
 plt.show()
 # -
 
 pca_2d = PCA(n_components=2)
 X_2d = pca_2d.fit_transform(X)
 
-#print(X_2d[[4]]) questo è il punto dei positivi che sta insieme ai negativi
-show_scatter_plot(X_2d, y_2, 'PCA - Scatter Plot (df_2)')
-show_scatter_plot(X_2d, y_3, 'PCA - Scatter Plot (df_3)')
+show_scatter_plot(X_2d, y_2, y_unique_text_2, ['b', 'm'], 'PCA - Scatter Plot (df_2)')
+show_scatter_plot(X_2d, y_3, y_unique_text_3, ['b', 'm', 'g'], 'PCA - Scatter Plot (df_3)')
 
-show_cluster_plot(2, X_2d, y_2, ['b', 'm'], 'Cluster Plot (df_2)')
-show_cluster_plot(3, X_2d, y_3, ['b', 'm', 'g'], 'Cluster Plot (df_3)')
+show_cluster_plot(2, X_2d, y_2, y_unique_text_2, ['b', 'm'], 'Cluster Plot (df_2)')
+show_cluster_plot(3, X_2d, y_3, y_unique_text_3, ['b', 'm', 'g'], 'Cluster Plot (df_3)')
 
 
 def display_table(title, data):
