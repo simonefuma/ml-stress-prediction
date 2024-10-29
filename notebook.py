@@ -75,7 +75,7 @@ def show_correlation_matrix(df, title):
     plt.show()
 
 
-def show_scatter_plot(y, title):
+def show_scatter_plot(X_2d, y, title):
     plt.figure(figsize=(8, 6))
     scatter = plt.scatter(X_2d[:, 0], X_2d[:, 1], c=y, cmap='Paired', edgecolor='k', s=150)
     
@@ -100,10 +100,28 @@ y_3 = df_3['target']
 show_correlation_matrix(df_2, 'Matrice di Correlazione (df_2)')
 show_correlation_matrix(df_3, 'Matrice di Correlazione (df_3)')
 
+# +
+pca = PCA(n_components=13)
+pca.fit(X)
+
+explained_variance = np.cumsum(pca.explained_variance_ratio_)
+
+plt.figure(figsize=(8, 5))
+plt.plot(range(1, len(explained_variance) + 1), explained_variance, marker='o')
+plt.title('Cumulative Explained Variance')
+plt.xlabel('Number of Components')
+plt.ylabel('Cumulative Explained Variance')
+plt.xticks(range(1, len(explained_variance) + 1))
+plt.grid()
+plt.axhline(y=0.9, color='r', linestyle='--')
+plt.show()
+# -
+
+#print(X_2d[[4]]) questo è il punto dei positivi che sta insieme ai negativi
 pca_2d = PCA(n_components=2)
 X_2d = pca_2d.fit_transform(X)
-show_scatter_plot(y_2, 'PCA - Scatter Plot (df_2)')
-show_scatter_plot(y_3, 'PCA - Scatter Plot (df_3)')
+show_scatter_plot(X_2d, y_2, 'PCA - Scatter Plot (df_2)')
+show_scatter_plot(X_2d, y_3, 'PCA - Scatter Plot (df_3)')
 
 
 def display_table(title, data):
