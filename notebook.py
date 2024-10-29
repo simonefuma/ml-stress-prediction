@@ -166,8 +166,7 @@ models = [
             'C': [0.01, 0.1, 1, 10, 100],
             'kernel': ['linear', 'poly', 'rbf', 'sigmoid'],
             'degree': [2, 3, 4, 5],
-            'gamma': ['scale', 'auto', 0.001, 0.01, 0.1, 1],
-            'coef0': [0.0, 0.5, 1.0]
+            'gamma': ['scale', 'auto', 0.001, 0.01, .1, 1]
         }
     }
 ]
