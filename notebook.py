@@ -6,6 +6,12 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from joblib import Parallel, delayed
+from pathlib import Path
+import subprocess
+import os
+import json
+import logging
+import pickle
 
 import sklearn.metrics as metrics
 from sklearn.neighbors import KNeighborsClassifier
@@ -72,6 +78,20 @@ plt.show()
 
 
 # -
+
+def np_jsonify(data):
+    """Recursively replaces np.float64 instances with float in a nested dictionary."""
+    data = copy.deepcopy(data)
+    if isinstance(data, dict):
+        for key, value in data.items():
+            data[key] = np_jsonify(value)
+    elif isinstance(data, list):
+        for i in range(len(data)):
+            data[i] = np_jsonify(data[i])
+    elif isinstance(data, np.float64):
+        return float(data)
+    return data
+
 
 def make_hp_configurations(grid):
     return [{n: v for n, v in zip(grid. keys(), t)} for t in it.product(*grid.values())]
@@ -140,33 +160,62 @@ def learn_parallel(X, y, estimator, param_grid, outer_split_method, inner_split_
 
 
 def learn_models(X, y, models, test_scorers, minimize_test_scorer, index_test_scorer):
-    results = []
+    EXPERIMENTS_PATH = Path('experiments')
+    subprocess.run(['mkdir', '-p', str(EXPERIMENTS_PATH)])
+
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(asctime)s > %(message)s')
+    file_handler = None
     
+    results = []
     for model in models:
-        pipe = Pipeline(steps=[
-            ('scaler', _),
-            ('classifier', model['model'])
-        ])
+        result = None
+        trained_model = None
+        
+        file_name = EXPERIMENTS_PATH / (model['model'].__class__.__name__.lower())
+        log_file = file_name.with_suffix('.log')
+        model_file = file_name.with_suffix('.pickle')
 
-        param_grid = ({'scaler': [StandardScaler(), MinMaxScaler()]} |
-                     {'classifier__'+key: value for key, value in model['param_grid'].items()})
+        if os.path.exists(log_file) and os.path.exists(model_file):
+            with open(log_file, 'r') as f:
+                result = f.read()
+            result = json.loads(result[result.index('>')+2:].strip())
 
-        results.append({
-            'model': model['model'].__class__.__name__,
-            'result': learn_parallel(X, y, pipe, param_grid,
-                                     StratifiedKFold(n_splits=4, shuffle=True, random_state=42),
-                                     StratifiedKFold(n_splits=3, shuffle=True, random_state=42),
-                                     val_scorer=metrics.accuracy_score,
-                                     minimize_val_scorer=False,
-                                     test_scorers=test_scorers,
-                                     minimize_test_scorer=minimize_test_scorer,
-                                     index_test_scorer=index_test_scorer,
-                                     n_jobs=-1
-                                    )        
-        })
+            with open(model_file, 'rb') as f:
+                trained_model = pickle.load(f)
+        else:
+            logger.removeHandler(file_handler)
+            file_handler = logging.FileHandler(log_file)
+            file_handler.setLevel(logging.INFO)
+            file_handler.setFormatter(formatter)
+            logger.addHandler(file_handler)
+            
+            pipe = Pipeline(steps=[
+                ('scaler', _),
+                ('classifier', model['model'])
+            ])
+    
+            param_grid = ({'scaler': [StandardScaler(), MinMaxScaler()]} |
+                         {'classifier__'+key: value for key, value in model['param_grid'].items()})
 
+            trained_model, result = learn_parallel(X, y, pipe, param_grid,
+                                                   StratifiedKFold(n_splits=4, shuffle=True, random_state=42),
+                                                   StratifiedKFold(n_splits=3, shuffle=True, random_state=42),
+                                                   val_scorer=metrics.accuracy_score,
+                                                   minimize_val_scorer=False,
+                                                   test_scorers=test_scorers,
+                                                   minimize_test_scorer=minimize_test_scorer,
+                                                   index_test_scorer=index_test_scorer,
+                                                   n_jobs=-1)
+            logger.info(json.dumps(np_jsonify(result)))
+            with open(model_file, 'wb') as f:
+                pickle.dump(trained_model, f)
+
+        results.append({'model_name': model['model'].__class__.__name__, 'model': trained_model, 'result': result})
+            
+            
     return results
-
 
 # +
 models = [
@@ -203,5 +252,7 @@ test_scorers = [
 ]
 learn_models(X.values, y.values, models, test_scorers, False, 2)
 # -
+
+
 
 
