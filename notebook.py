@@ -1,9 +1,11 @@
 # +
+import copy
 import itertools as it
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
+from joblib import Parallel, delayed
 
 import sklearn.metrics as metrics
 from sklearn.neighbors import KNeighborsClassifier
@@ -88,9 +90,23 @@ def check_best(minimize, score, best_score):
     return (minimize and score < best_score) or (not minimize and score > best_score)
 
 
-def learn(X, y, estimator, param_grid, outer_split_method, inner_split_method,
-            val_scorer=metrics.root_mean_squared_error, minimize_val_scorer=True, 
-            test_scorers=[metrics.root_mean_squared_error], minimize_test_scorer=True, index_test_scorer=0):
+def inner_learn(X_trainval, y_trainval, estimator, hp_conf, inner_split_method, val_scorer=metrics.root_mean_squared_error):
+    conf_scores = []
+            
+    for train_index, val_index in inner_split_method.split(X_trainval, y_trainval):
+        X_train, X_val = X_trainval[train_index], X_trainval[val_index]
+        y_train, y_val = y_trainval[train_index], y_trainval[val_index]
+
+        fit_estimator(X_train, y_train, estimator, hp_conf)
+        conf_scores.append(get_score(X_val, y_val, estimator, val_scorer))
+            
+    return np.mean(conf_scores), hp_conf
+
+
+def learn_parallel(X, y, estimator, param_grid, outer_split_method, inner_split_method, 
+                   val_scorer=metrics.root_mean_squared_error, minimize_val_scorer=True, 
+                   test_scorers=[metrics.root_mean_squared_error], minimize_test_scorer=True, index_test_scorer=0, 
+                   n_jobs=-1):
     outer_scores = []
 
     best_score = np.inf if minimize_test_scorer else -np.inf
@@ -100,23 +116,18 @@ def learn(X, y, estimator, param_grid, outer_split_method, inner_split_method,
         X_trainval, X_test = X[trainval_index], X[test_index]
         y_trainval, y_test = y[trainval_index], y[test_index]
 
-        best_inner_score = np.inf if minimize_val_scorer else -np.inf
-        best_inner_conf = None
+        inner_results = Parallel(n_jobs=n_jobs)(delayed(inner_learn)
+                                            (
+                                                X_trainval, 
+                                                y_trainval,
+                                                copy.deepcopy(estimator),
+                                                hp_conf, 
+                                                inner_split_method=inner_split_method,
+                                                val_scorer=val_scorer
+                                            )
+                                       for hp_conf in make_hp_configurations(param_grid))
+        best_inner_conf = sorted(inner_results, key=lambda t: t[0])[0 if minimize_val_scorer else -1][1]
         
-        for hp_conf in make_hp_configurations(param_grid):
-            conf_scores = []
-            
-            for train_index, val_index in inner_split_method.split(X_trainval, y_trainval):
-                X_train, X_val = X_trainval[train_index], X_trainval[val_index]
-                y_train, y_val = y_trainval[train_index], y_trainval[val_index]
-
-                fit_estimator(X_train, y_train, estimator, hp_conf)
-                conf_scores.append(get_score(X_val, y_val, estimator, val_scorer))
-            
-            conf_score = np.mean(conf_scores)
-            if check_best(minimize_val_scorer, conf_score, best_inner_score):
-                best_inner_score, best_inner_conf = conf_score, hp_conf
-                
         fit_estimator(X_trainval, y_trainval, estimator, best_inner_conf)
         outer_scores.append([get_score(X_test, y_test, estimator, test_scorer) for test_scorer in test_scorers])
         if check_best(minimize_test_scorer, outer_scores[-1][index_test_scorer], best_score):
@@ -142,15 +153,16 @@ def learn_models(X, y, models, test_scorers, minimize_test_scorer, index_test_sc
 
         results.append({
             'model': model['model'].__class__.__name__,
-            'result': learn(X, y, pipe, param_grid,
-                            StratifiedKFold(n_splits=4, shuffle=True, random_state=42),
-                            StratifiedKFold(n_splits=3, shuffle=True, random_state=42),
-                            val_scorer=metrics.accuracy_score,
-                            minimize_val_scorer=False,
-                            test_scorers=test_scorers,
-                            minimize_test_scorer=minimize_test_scorer,
-                            index_test_scorer=index_test_scorer
-                           )        
+            'result': learn_parallel(X, y, pipe, param_grid,
+                                     StratifiedKFold(n_splits=4, shuffle=True, random_state=42),
+                                     StratifiedKFold(n_splits=3, shuffle=True, random_state=42),
+                                     val_scorer=metrics.accuracy_score,
+                                     minimize_val_scorer=False,
+                                     test_scorers=test_scorers,
+                                     minimize_test_scorer=minimize_test_scorer,
+                                     index_test_scorer=index_test_scorer,
+                                     n_jobs=-1
+                                    )        
         })
 
     return results
