@@ -18,6 +18,7 @@ import sklearn.metrics as metrics
 from sklearn.decomposition import PCA
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
+from sklearn.tree import DecisionTreeClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.model_selection import StratifiedKFold
@@ -138,6 +139,18 @@ def show_cluster_plot(k, X, y, y_text, colors, title):
     plt.show()
 
 
+def show_cluster_table(k, X, y, y_text, title):
+    kmeans = KMeans(n_clusters=k, random_state=42)
+    predicts = kmeans.fit_predict(X)
+
+    table = X.drop(columns=X.columns)
+    table['target'] = y_text[y]
+    table['predict'] = y_text[predicts]
+    
+    print('\n', title)
+    display(table)
+
+
 # +
 df_2 = copy.copy(df)
 df_2['target'] = pd.factorize(df['target'].str.split(' - ').str[0])[0]
@@ -178,6 +191,9 @@ show_scatter_plot(X_2d, y_3, y_unique_text_3, ['b', 'm', 'g'], 'PCA - Scatter Pl
 
 show_cluster_plot(2, X_2d, y_2, y_unique_text_2, ['b', 'm'], 'Cluster Plot (df_2)')
 show_cluster_plot(3, X_2d, y_3, y_unique_text_3, ['b', 'm', 'g'], 'Cluster Plot (df_3)')
+
+show_cluster_table(2, X, y_2, y_unique_text_2, 'df_2')
+show_cluster_table(3, X, y_3, y_unique_text_3, 'df_3')
 
 
 def display_table(title, data):
@@ -334,7 +350,7 @@ models = [
         'model': KNeighborsClassifier(),
         'param_grid': 
         {
-            'n_neighbors': [k for k in range(1, 12, 2)],
+            'n_neighbors': [1, 3, 5, 7, 9, 11],
             'metric': ['cityblock', 'cosine', 'euclidean', 'l2', 'l1', 'manhattan', 'nan_euclidean']
         }
     },
@@ -345,7 +361,7 @@ models = [
             'C': [0.01, 0.1, 1, 10, 100],
             'kernel': ['linear', 'poly', 'rbf', 'sigmoid'],
             'degree': [2, 3, 4, 5],
-            'gamma': ['scale', 'auto', 0.001, 0.01, .1, 1]
+            'gamma': ['scale', 'auto', 0.001, 0.01, 0.1, 1]
         }
     }
 ]
