@@ -23,6 +23,8 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
+
+RANDOM_STATE = 42
 # -
 
 df = pd.read_csv('data.csv', index_col='ID animals', dtype={'sucrose intake': 'float64', 'NOR index': 'float64'})
