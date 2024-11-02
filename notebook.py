@@ -368,6 +368,21 @@ models = [
             'degree': [2, 3, 4, 5],
             'gamma': ['scale', 'auto', 0.001, 0.01, 0.1, 1]
         }
+    },
+    {
+        'model': DecisionTreeClassifier(random_state=42),
+        'param_grid':
+        {
+            'criterion': ['gini', 'entropy', 'log_loss'],
+            'splitter': ['best', 'random'],
+            'max_depth': [None, 1, 2, 3, 4, 5, 10, 15, 20],
+            'min_samples_split': [0.01, 0.05, 0.1, 0.2, 0.3],
+            'min_samples_leaf': [1, 0.05, 0.1, 0.2, 0.3],
+            #'min_weight_fraction_leaf': [],
+            'max_features': [None, 'sqrt', 'log2', 1, 0.01, 0.05, 0.1, 0.2, 0.3],
+            'max_leaf_nodes': [None, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+            'min_impurity_decrease': [0, 0.1, 0.2, 0.3, 0.4, 0.5]
+        }
     }
 ]
 
