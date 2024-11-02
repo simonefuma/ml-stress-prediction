@@ -1,28 +1,28 @@
 # +
 import copy
 import itertools as it
+import json
+import logging
+import os
+import pickle
+import subprocess
+from pathlib import Path
+
+from joblib import Parallel, delayed
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from joblib import Parallel, delayed
-from pathlib import Path
-import subprocess
-import os
-import json
-import logging
-import pickle
-
 from matplotlib.colors import ListedColormap
 import sklearn.metrics as metrics
+from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
+from sklearn.model_selection import StratifiedKFold
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
-from sklearn.model_selection import StratifiedKFold
-from sklearn.cluster import KMeans
 # -
 
 df = pd.read_csv('data.csv', index_col='ID animals', dtype={'sucrose intake': 'float64', 'NOR index': 'float64'})

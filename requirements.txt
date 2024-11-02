@@ -1,7 +1,6 @@
-jupytext
+joblib
 matplotlib
-notebook
 numpy
 pandas
-scikit-learn
 seaborn
+scikit-learn
