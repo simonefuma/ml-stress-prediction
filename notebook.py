@@ -196,13 +196,11 @@ show_cluster_table(2, X, y_2, y_unique_text_2, 'df_2')
 show_cluster_table(3, X, y_3, y_unique_text_3, 'df_3')
 
 
-def display_table(title, data):
-    print('\n' * 1)
-    table = pd.DataFrame(data)
+def display_table(learned_model):
+    table = pd.DataFrame(learned_model['result'])
     table[['avg', 'std']] = table[['avg', 'std']].round(3)
     table.set_index('scorer_name', inplace=True)
-    print(title)
-    print('-' * 27)
+    print('\n', learned_model['model'], '\n', learned_model['model_name'], '\n', '-' * 27)
     display(table)
 
 
@@ -286,7 +284,7 @@ def learn_parallel(X, y, estimator, param_grid, outer_split_method, inner_split_
     return estimator, [{'scorer_name':test_scorer.__name__, 'avg':avg[i], 'std':std[i]} for i, test_scorer in enumerate(test_scorers)]
 
 
-def learn_models(X, y, models, test_scorers, minimize_test_scorer, index_test_scorer):
+def learn_models(X, y, models, test_scorers=[metrics.accuracy_score], index_test_scorer=0, minimize_test_scorer=False, replace=False):
     EXPERIMENTS_PATH = Path('experiments')
     subprocess.run(['mkdir', '-p', str(EXPERIMENTS_PATH)])
 
@@ -303,6 +301,13 @@ def learn_models(X, y, models, test_scorers, minimize_test_scorer, index_test_sc
         file_name = EXPERIMENTS_PATH / (model['model'].__class__.__name__.lower())
         log_file = file_name.with_suffix('.log')
         model_file = file_name.with_suffix('.pickle')
+
+        if replace:
+            try:
+                os.remove(log_file)
+                os.remove(model_file)
+            except FileNotFoundError:
+                pass
 
         if os.path.exists(log_file) and os.path.exists(model_file):
             with open(log_file, 'r') as f:
@@ -377,9 +382,13 @@ test_scorers = [
     metrics.recall_score, 
     specificity_scorer
 ]
-learned_models = learn_models(X.values, y_2.values, models, test_scorers, False, 2)
+learned_models = learn_models(X.values, y_2.values, models, 
+                              test_scorers=test_scorers, 
+                              index_test_scorer=2, 
+                              minimize_test_scorer=False,
+                              replace=False)
 for learned_model in learned_models:
-    display_table(learned_model['model_name'], learned_model['result'])
+    display_table(learned_model)
 # -
 
 
