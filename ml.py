@@ -1,5 +1,9 @@
+import copy
+import itertools as it
 import json
+import joblib
 import logging
+import numpy as np
 import os
 import pickle
 import subprocess
@@ -7,6 +11,9 @@ from pathlib import Path
 
 from config import RANDOM_STATE
 import sklearn.metrics as metrics
+from sklearn.model_selection import StratifiedKFold
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 def np_jsonify(data):
     """Recursively replaces np.float64 instances with float in a nested dictionary."""
@@ -127,7 +134,7 @@ def learn_models(X, y, models, test_scorers=[metrics.accuracy_score], index_test
             logger.addHandler(file_handler)
             
             pipe = Pipeline(steps=[
-                ('scaler', _),
+                ('scaler', None),
                 ('classifier', model['model'])
             ])
     

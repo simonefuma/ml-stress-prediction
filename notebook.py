@@ -17,11 +17,11 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 
-importlib.reload(ml)
+for module in [ml, config, visualize]:
+    importlib.reload(ml)
 # -
 
 df = pd.read_csv('data.csv', index_col='ID animals', dtype={'sucrose intake': 'float64', 'NOR index': 'float64'})
-X = df.drop(columns=['target'])
 df
 
 # Ottengo le righe che hanno campi vuoti
@@ -46,8 +46,21 @@ plt.boxplot(df.drop(columns=['target']).values, tick_labels=df.drop(columns=['ta
 
 plt.title('Boxplot per ogni attributo')
 plt.show()
+# -
+
+visualize.show_correlation_matrix(df_2, 'Matrice di Correlazione (df_2)')
+visualize.show_correlation_matrix(df_3, 'Matrice di Correlazione (df_3)')
 
 # +
+# # %OP = OP/(OP+CL)*100
+# t%OP = tOP/(tOP+tCL+tCENT)*100
+# tCENT = (300-tOP-tCL)
+try:
+    df = df.drop(columns=['tOP', 'tCL', 'tCENT'])
+except:
+    pass
+    
+X = df.drop(columns=['target'])
 df_2 = copy.copy(df)
 df_2['target'] = pd.factorize(df['target'].str.split(' - ').str[0])[0]
 y_unique_text_2 = df['target'].str.split(' - ').str[0].unique()
@@ -57,13 +70,9 @@ df_3 = copy.copy(df)
 df_3['target'] = pd.factorize(df['target'])[0]
 y_3 = df_3['target']
 y_unique_text_3 = df['target'].unique()
-# -
-
-visualize.show_correlation_matrix(df_2, 'Matrice di Correlazione (df_2)')
-visualize.show_correlation_matrix(df_3, 'Matrice di Correlazione (df_3)')
 
 # +
-pca = PCA(n_components=13)
+pca = PCA(n_components=len(X.columns))
 pca.fit(X)
 
 explained_variance = np.cumsum(pca.explained_variance_ratio_)
