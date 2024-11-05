@@ -17,15 +17,16 @@ from matplotlib.colors import ListedColormap
 import sklearn.metrics as metrics
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import StratifiedKFold
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
+# -
 
 RANDOM_STATE = 42
-# -
 
 df = pd.read_csv('data.csv', index_col='ID animals', dtype={'sucrose intake': 'float64', 'NOR index': 'float64'})
 X = df.drop(columns=['target'])
@@ -102,7 +103,7 @@ def show_scatter_plot(X, y, y_text, colors, title):
 
 
 def show_cluster_plot(k, X, y, y_text, colors, title):
-    kmeans = KMeans(n_clusters=k, random_state=42)
+    kmeans = KMeans(n_clusters=k, random_state=RANDOM_STATE)
     predicts = kmeans.fit_predict(X)
     centroids = kmeans.cluster_centers_;
 
@@ -142,7 +143,7 @@ def show_cluster_plot(k, X, y, y_text, colors, title):
 
 
 def show_cluster_table(k, X, y, y_text, title):
-    kmeans = KMeans(n_clusters=k, random_state=42)
+    kmeans = KMeans(n_clusters=k, random_state=RANDOM_STATE)
     predicts = kmeans.fit_predict(X)
 
     table = X.drop(columns=X.columns)
@@ -293,7 +294,6 @@ def learn_models(X, y, models, test_scorers=[metrics.accuracy_score], index_test
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
     formatter = logging.Formatter('%(asctime)s > %(message)s')
-    file_handler = None
     
     results = []
     for model in models:
@@ -319,7 +319,7 @@ def learn_models(X, y, models, test_scorers=[metrics.accuracy_score], index_test
             with open(model_file, 'rb') as f:
                 trained_model = pickle.load(f)
         else:
-            logger.removeHandler(file_handler)
+            logger.handlers.clear()
             file_handler = logging.FileHandler(log_file)
             file_handler.setLevel(logging.INFO)
             file_handler.setFormatter(formatter)
@@ -334,8 +334,8 @@ def learn_models(X, y, models, test_scorers=[metrics.accuracy_score], index_test
                          {'classifier__'+key: value for key, value in model['param_grid'].items()})
 
             trained_model, result = learn_parallel(X, y, pipe, param_grid,
-                                                   StratifiedKFold(n_splits=4, shuffle=True, random_state=42),
-                                                   StratifiedKFold(n_splits=3, shuffle=True, random_state=42),
+                                                   StratifiedKFold(n_splits=4, shuffle=True, random_state=RANDOM_STATE),
+                                                   StratifiedKFold(n_splits=3, shuffle=True, random_state=RANDOM_STATE),
                                                    val_scorer=metrics.accuracy_score,
                                                    minimize_val_scorer=False,
                                                    test_scorers=test_scorers,
@@ -372,7 +372,7 @@ models = [
         }
     },
     {
-        'model': DecisionTreeClassifier(random_state=42),
+        'model': DecisionTreeClassifier(random_state=RANDOM_STATE),
         'param_grid':
         {
             'criterion': ['gini', 'entropy', 'log_loss'],
@@ -380,10 +380,17 @@ models = [
             'max_depth': [None, 1, 2, 3, 4, 5, 10, 15, 20],
             'min_samples_split': [0.01, 0.05, 0.1, 0.2, 0.3],
             'min_samples_leaf': [1, 0.05, 0.1, 0.2, 0.3],
-            #'min_weight_fraction_leaf': [],
-            'max_features': [None, 'sqrt', 'log2', 1, 0.01, 0.05, 0.1, 0.2, 0.3],
-            'max_leaf_nodes': [None, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-            'min_impurity_decrease': [0, 0.1, 0.2, 0.3, 0.4, 0.5]
+        }
+    },
+    {
+        'model': RandomForestClassifier(bootstrap=False, random_state=RANDOM_STATE),
+        'param_grid':
+        {
+            'n_estimators': [3, 5, 7],
+            'criterion': ['gini', 'entropy', 'log_loss'],
+            'max_depth': [None, 1, 2, 3, 4, 5, 10, 15, 20],
+            'min_samples_split': [0.01, 0.05, 0.1, 0.2, 0.3],
+            'min_samples_leaf': [1, 0.05, 0.1, 0.2, 0.3],
         }
     }
 ]
@@ -407,6 +414,8 @@ learned_models = learn_models(X.values, y_2.values, models,
 for learned_model in learned_models:
     display_table(learned_model)
 # -
+
+
 
 
 
