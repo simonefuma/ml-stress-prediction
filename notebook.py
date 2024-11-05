@@ -91,6 +91,7 @@ plt.show()
 
 pca_2d = PCA(n_components=2)
 X_2d = pca_2d.fit_transform(StandardScaler().fit_transform(X))
+pd.DataFrame(pca_2d.components_, columns=X.columns, index=[f'PC {i+1}' for i in range(pca_2d.n_components_)])
 
 visualize.show_scatter_plot(X_2d, y_2, y_unique_text_2, ['b', 'm'], 'PCA - Scatter Plot (df_2)')
 visualize.show_scatter_plot(X_2d, y_3, y_unique_text_3, ['b', 'm', 'g'], 'PCA - Scatter Plot (df_3)')
