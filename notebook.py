@@ -17,7 +17,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 
-for module in [ml, config, visualize]:
+for module in [ml, visualize]:
     importlib.reload(ml)
 # -
 
@@ -73,9 +73,10 @@ y_unique_text_3 = df['target'].unique()
 
 # +
 pca = PCA(n_components=len(X.columns))
-pca.fit(X)
+pca.fit(StandardScaler().fit_transform(X))
 
 explained_variance = np.cumsum(pca.explained_variance_ratio_)
+n_components = np.argmax(explained_variance > 0.9)+1
 
 plt.figure(figsize=(8, 5))
 plt.plot(range(1, len(explained_variance) + 1), explained_variance, marker='o')
@@ -89,7 +90,7 @@ plt.show()
 # -
 
 pca_2d = PCA(n_components=2)
-X_2d = pca_2d.fit_transform(X)
+X_2d = pca_2d.fit_transform(StandardScaler().fit_transform(X))
 
 visualize.show_scatter_plot(X_2d, y_2, y_unique_text_2, ['b', 'm'], 'PCA - Scatter Plot (df_2)')
 visualize.show_scatter_plot(X_2d, y_3, y_unique_text_3, ['b', 'm', 'g'], 'PCA - Scatter Plot (df_3)')
