@@ -4,7 +4,7 @@ Metodi di machine learning per la predizione dello stato di stress indotto da es
 ## Prerequisiti
 
 Assicurati di avere installato **Python3** puoi controllare la tua versione usando il seguente comando:
-```
+```console
 python3 --version
 ```
 Se non è installato puoi installarlo dal sito ufficiale: <a href="https://www.python.org/downloads/" target="_blank">Python Download</a>.
@@ -20,11 +20,11 @@ Puoi eseguire uno script di setup che configura automaticamente l'ambiente virtu
 - **MacOS/Linux:**
 
 Per renderlo eseguibile:
-```
+```console
 chmod +x setup.sh
 ```
 Per Lanciarlo:
-```
+```console
 ./setup.sh
 ```
 ### Opzione 2: Setup Manuale
@@ -32,22 +32,22 @@ Per Lanciarlo:
 - **MacOS/Linux:**
 
 Utilizza il modulo `venv` integrato in Python3 per creare l'ambiente virtuale. Da dentro la cartella del progetto, esegui il seguente comando:
-```
+```console
 python3 -m venv .venv --promt ml-stress-prediction
 ```
 
 Per attivare l'ambiente virtuale appena creato usa questo comando:
-```
+```console
 source .venv/bin/activate
 ```
 
 Ora che l'ambiente virtuale è attivo, puoi installare tutte le librerie necessarie per il progetto. Le dipendenze sono elencate nel file `requirements.txt`. Usa il seguente comando per installarle:
-```
+```console
 pip install -r requirements.txt
 ```
 
 Quando hai finito di lavorare, puoi disattivare l'ambiente virtuale con il comando:
-```
+```console
 deactivate
 ```
 
@@ -58,11 +58,11 @@ Jupytext permette, tra le altre cose, di convertire qualsiasi notebook Jupyter i
 Si deve convertire il file `.py` in `.ipynb` per visualizzare il notebook con la sua ultima versione, ed è importante riconvertirlo poi per poter versionare le modifiche che abbiamo fatto.
 
 - Convertire da `.py` a `.ipynb`
-```
+```console
 jupytext --to notebook notebook.py
 ```
 
 - Convertire da `.ipynb` a `.py`
-```
+```console
 jupytext --to py notebook.ipynb 
 ```
