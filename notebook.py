@@ -202,11 +202,12 @@ show_cluster_table(3, X, y_3, y_unique_text_3, 'df_3')
 
 
 def display_table(learned_model):
-    table = pd.DataFrame(learned_model['result'])
-    table[['avg', 'std']] = table[['avg', 'std']].round(3)
-    table.set_index('scorer_name', inplace=True)
+    result_df = pd.DataFrame(learned_model['result'])
+    result_df[['avg', 'std']] = result_df[['avg', 'std']].round(3)
+    
+    result_df.set_index('scorer_name', inplace=True)
     print('\n', learned_model['model'], '\n', learned_model['model_name'], '\n', '-' * 27)
-    display(table)
+    display(result_df)
 
 
 def np_jsonify(data):
@@ -230,6 +231,12 @@ def make_hp_configurations(grid):
 def fit_estimator(X, y, estimator, hp_conf):
     estimator.set_params(**hp_conf)
     estimator.fit(X, y)
+
+
+def fit_get_score(X, y, X_test, y_test, estimator, hp_conf, scorer):
+    estimator.set_params(**hp_conf)
+    estimator.fit(X, y)
+    return scorer(y_test, estimator.predict(X_test))
 
 
 def get_score(X_test, y_test, estimator, scorer): 
@@ -276,8 +283,8 @@ def learn_parallel(X, y, estimator, param_grid, outer_split_method, inner_split_
                                                 val_scorer=val_scorer
                                             )
                                        for hp_conf in make_hp_configurations(param_grid))
-        best_inner_conf = sorted(inner_results, key=lambda t: t[0])[0 if minimize_val_scorer else -1][1]
         
+        best_inner_conf =  min(inner_results, key=lambda inner_result: inner_result[0] if minimize_val_scorer else -inner_result[0])[1]
         fit_estimator(X_trainval, y_trainval, estimator, best_inner_conf)
         outer_scores.append([get_score(X_test, y_test, estimator, test_scorer) for test_scorer in test_scorers])
         if check_best(minimize_test_scorer, outer_scores[-1][index_test_scorer], best_score):
@@ -408,15 +415,15 @@ test_scorers = [
     metrics.recall_score, 
     specificity_scorer
 ]
+
 learned_models = learn_models(X.values, y_2.values, models, 
                               test_scorers=test_scorers, 
-                              index_test_scorer=2, 
+                              index_test_scorer=0, 
                               minimize_test_scorer=False,
                               replace=False)
 for learned_model in learned_models:
     display_table(learned_model)
 # -
-
 
 
 
