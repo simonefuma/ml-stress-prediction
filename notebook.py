@@ -146,12 +146,14 @@ def show_cluster_table(k, X, y, y_text, title):
     kmeans = KMeans(n_clusters=k, random_state=RANDOM_STATE)
     predicts = kmeans.fit_predict(X)
 
-    table = X.drop(columns=X.columns)
-    table['target'] = y_text[y]
-    table['predict'] = y_text[predicts]
-    
-    print('\n', title)
-    display(table)
+    results_df = pd.DataFrame({
+        title: y_text[y],
+        'cluster': predicts
+    })
+
+    cluster_table = pd.crosstab(results_df['cluster'], results_df[title])
+
+    display(cluster_table)
 
 
 # +
