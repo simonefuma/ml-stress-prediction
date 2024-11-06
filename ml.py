@@ -15,6 +15,38 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
+def get_binary_scorers():
+    specificity_scorer = lambda y_true, y_pred: metrics.recall_score(y_true, y_pred, pos_label=0)
+    specificity_scorer.__name__ = 'specificity_scorer'
+
+    return [
+        metrics.accuracy_score, 
+        metrics.f1_score, 
+        metrics.precision_score, 
+        metrics.recall_score, 
+        specificity_scorer
+    ]
+
+
+def get_multiclass_scorers():
+    multiclass_scorers = [metrics.accuracy_score]
+    specificity_score_macro = lambda y_true, y_pred: metrics.recall_score(y_true, y_pred, average='macro', labels=[0, 1, 2])
+    specificity_score_macro.__name__ = 'specificity_score_macro'
+    specificity_score_micro = lambda y_true, y_pred: metrics.recall_score(y_true, y_pred, average='micro', labels=[0, 1, 2])
+    specificity_score_micro.__name__ = 'specificity_score_micro'
+    specificity_score_weighted = lambda y_true, y_pred: metrics.recall_score(y_true, y_pred, average='weighted', labels=[0, 1, 2])
+    specificity_score_weighted.__name__ = 'specificity_score_weighted'
+    multiclass_scorers += [specificity_score_macro, specificity_score_micro, specificity_score_weighted]
+
+    for score in [metrics.f1_score, metrics.precision_score, metrics.recall_score]:
+        for average in ['macro', 'micro', 'weighted']:
+            multiclass_score = lambda y_true, y_pred, score=score, average=average: score(y_true, y_pred, average=average, zero_division=0)
+            multiclass_score.__name__ = f'{score.__name__}_{average}'
+            multiclass_scorers.append(multiclass_score)
+    
+    return multiclass_scorers
+    
+
 def np_jsonify(data):
     """Recursively replaces np.float64 instances with float in a nested dictionary."""
     data = copy.deepcopy(data)
@@ -95,7 +127,11 @@ def learn_parallel(X, y, estimator, param_grid, outer_split_method, inner_split_
     return estimator, [{'scorer_name':test_scorer.__name__, 'avg':avg[i], 'std':std[i]} for i, test_scorer in enumerate(test_scorers)]
 
 
-def learn_models(X, y, models, test_scorers=[metrics.accuracy_score], index_test_scorer=0, minimize_test_scorer=False, replace=False):
+def learn_models(X, y, models, outer_split_method, inner_split_method,
+                 test_scorers=[metrics.accuracy_score], 
+                 index_test_scorer=0, 
+                 minimize_test_scorer=False, 
+                 replace=False):
     EXPERIMENTS_PATH = Path('experiments')
     subprocess.run(['mkdir', '-p', str(EXPERIMENTS_PATH)])
 
@@ -108,7 +144,7 @@ def learn_models(X, y, models, test_scorers=[metrics.accuracy_score], index_test
         result = None
         trained_model = None
         
-        file_name = EXPERIMENTS_PATH / (model['model'].__class__.__name__.lower())
+        file_name = EXPERIMENTS_PATH / model['name']
         log_file = file_name.with_suffix('.log')
         model_file = file_name.with_suffix('.pickle')
 
@@ -142,8 +178,8 @@ def learn_models(X, y, models, test_scorers=[metrics.accuracy_score], index_test
                          {'classifier__'+key: value for key, value in model['param_grid'].items()})
 
             trained_model, result = learn_parallel(X, y, pipe, param_grid,
-                                                   StratifiedKFold(n_splits=4, shuffle=True, random_state=RANDOM_STATE),
-                                                   StratifiedKFold(n_splits=3, shuffle=True, random_state=RANDOM_STATE),
+                                                   outer_split_method,
+                                                   inner_split_method,
                                                    val_scorer=metrics.accuracy_score,
                                                    minimize_val_scorer=False,
                                                    test_scorers=test_scorers,
@@ -154,7 +190,7 @@ def learn_models(X, y, models, test_scorers=[metrics.accuracy_score], index_test
             with open(model_file, 'wb') as f:
                 pickle.dump(trained_model, f)
 
-        results.append({'model_name': model['model'].__class__.__name__, 'model': trained_model, 'result': result})
+        results.append({'model_name': model['name'], 'model': trained_model, 'result': result})
             
             
     return results

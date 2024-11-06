@@ -18,7 +18,7 @@ from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 
 for module in [ml, visualize]:
-    importlib.reload(ml)
+    importlib.reload(module)
 # -
 
 df = pd.read_csv('data.csv', index_col='ID animals', dtype={'sucrose intake': 'float64', 'NOR index': 'float64'})
@@ -76,7 +76,7 @@ pca = PCA(n_components=len(X.columns))
 pca.fit(StandardScaler().fit_transform(X))
 
 explained_variance = np.cumsum(pca.explained_variance_ratio_)
-n_components = np.argmax(explained_variance > 0.9)+1
+n_min_components = np.argmax(explained_variance > 0.9)+1
 
 plt.figure(figsize=(8, 5))
 plt.plot(range(1, len(explained_variance) + 1), explained_variance, marker='o')
@@ -96,9 +96,106 @@ pd.DataFrame(pca_2d.components_, columns=X.columns, index=[f'Cmp {i+1}' for i in
 visualize.show_scatter_plot(X_2d, y_2, y_unique_text_2, ['b', 'm'], 'PCA - Scatter Plot (df_2)')
 visualize.show_scatter_plot(X_2d, y_3, y_unique_text_3, ['b', 'm', 'g'], 'PCA - Scatter Plot (df_3)')
 
+# K-Means
 visualize.show_cluster_plot(2, X_2d, y_2, y_unique_text_2, ['b', 'm'], 'Cluster Plot (df_2)')
 visualize.show_cluster_plot(3, X_2d, y_3, y_unique_text_3, ['b', 'm', 'g'], 'Cluster Plot (df_3)')
 
+# +
+# SVC target 2
+models = [
+    {
+        'model': SVC(kernel='linear'),
+        'name': 'SVC_linear_X2_T2',
+        'param_grid':
+        {
+            'C': [0.01, 0.1, 1, 10, 100],
+        }
+    },
+    {
+        'model': SVC(kernel='poly'),
+        'name': 'SVC_poly_X2_T2',
+        'param_grid':
+        {
+            'C': [0.01, 0.1, 1, 10, 100],
+            'degree': [2, 3, 4, 5],
+            'gamma': ['scale', 'auto', 0.001, 0.01, 0.1, 1]
+        }
+    },
+    {
+        'model': SVC(kernel='rbf'),
+        'name': 'SVC_rbf_X2_T2',
+        'param_grid':
+        {
+            'C': [0.01, 0.1, 1, 10, 100],
+            'gamma': ['scale', 'auto', 0.001, 0.01, 0.1, 1]
+        }
+    }
+]
+
+learned_models = ml.learn_models(X_2d, 
+                                 y_2.values, 
+                                 models, 
+                                 StratifiedKFold(n_splits=8, shuffle=True, random_state=RANDOM_STATE),
+                                 StratifiedKFold(n_splits=3, shuffle=True, random_state=RANDOM_STATE),
+                                 test_scorers=ml.get_binary_scorers(), 
+                                 index_test_scorer=0, 
+                                 minimize_test_scorer=False, 
+                                 replace=False)
+
+for learned_model in learned_models:
+    visualize.display_table(learned_model)
+    visualize.show_svc_decision_boundary(X_2d, y_2, y_unique_text_2, learned_model['model'], ['b', 'm'], 
+                                         'SVC Decision Boundary ' + learned_model['model_name'])
+
+# +
+# SVC target 3
+models = [
+    {
+        'model': SVC(kernel='linear'),
+        'name': 'SVC_linear_X2_T3',
+        'param_grid':
+        {
+            'C': [0.01, 0.1, 1, 10, 100],
+        }
+    },
+    {
+        'model': SVC(kernel='poly'),
+        'name': 'SVC_poly_X2_T3',
+        'param_grid':
+        {
+            'C': [0.01, 0.1, 1, 10, 100],
+            'degree': [2, 3, 4, 5],
+            'gamma': ['scale', 'auto', 0.001, 0.01, 0.1, 1]
+        }
+    },
+    {
+        'model': SVC(kernel='rbf'),
+        'name': 'SVC_rbf_X2_T3',
+        'param_grid':
+        {
+            'C': [0.01, 0.1, 1, 10, 100],
+            'gamma': ['scale', 'auto', 0.001, 0.01, 0.1, 1]
+        }
+    }
+]
+
+learned_models = ml.learn_models(X_2d, 
+                                 y_3.values, 
+                                 models, 
+                                 StratifiedKFold(n_splits=8, shuffle=True, random_state=RANDOM_STATE),
+                                 StratifiedKFold(n_splits=7, shuffle=True, random_state=RANDOM_STATE),
+                                 test_scorers=ml.get_multiclass_scorers(), 
+                                 index_test_scorer=0, 
+                                 minimize_test_scorer=False, 
+                                 replace=True)
+
+for learned_model in learned_models:
+    visualize.display_table(learned_model)
+    visualize.show_svc_decision_boundary(X_2d, y_3, y_unique_text_3, learned_model['model'], ['b', 'm', 'g'], 
+                                         'SVC Decision Boundary ' + learned_model['model_name'])
+# -
+
+# K-Means
 visualize.show_cluster_table(2, X, y_2, y_unique_text_2, 'df_2')
 visualize.show_cluster_table(3, X, y_3, y_unique_text_3, 'df_3')
 
@@ -106,6 +203,7 @@ visualize.show_cluster_table(3, X, y_3, y_unique_text_3, 'df_3')
 models = [
     {
         'model': KNeighborsClassifier(),
+        'name': 'KNeighborsClassifier_X_T2',
         'param_grid': 
         {
             'n_neighbors': [1, 3, 5, 7, 9, 11],
@@ -114,6 +212,7 @@ models = [
     },
     {
         'model': SVC(),
+        'name': 'SVC_X_T2',
         'param_grid':
         {
             'C': [0.01, 0.1, 1, 10, 100],
@@ -124,6 +223,7 @@ models = [
     },
     {
         'model': DecisionTreeClassifier(random_state=RANDOM_STATE),
+        'name': 'DecisionTreeClassifier_X_T2',
         'param_grid':
         {
             'criterion': ['gini', 'entropy', 'log_loss'],
@@ -135,6 +235,7 @@ models = [
     },
     {
         'model': RandomForestClassifier(bootstrap=False, random_state=RANDOM_STATE),
+        'name': 'RandomForestClassifier_X_T2',
         'param_grid':
         {
             'n_estimators': [3, 5, 7],
@@ -146,25 +247,16 @@ models = [
     }
 ]
 
-
-specificity_scorer = lambda y_true, y_pred: metrics.recall_score(y_true, y_pred, pos_label=0)
-specificity_scorer.__name__ = "specificity_scorer"
-
-test_scorers = [
-    metrics.accuracy_score, 
-    metrics.f1_score, 
-    metrics.precision_score, 
-    metrics.recall_score, 
-    specificity_scorer
-]
-
 learned_models = ml.learn_models(X.values, 
                                  y_2.values, 
-                                 models, 
-                                 test_scorers=test_scorers, 
+                                 models,
+                                 StratifiedKFold(n_splits=4, shuffle=True, random_state=RANDOM_STATE),
+                                 StratifiedKFold(n_splits=3, shuffle=True, random_state=RANDOM_STATE),
+                                 test_scorers=ml.get_binary_scorers(), 
                                  index_test_scorer=0, 
                                  minimize_test_scorer=False, 
                                  replace=False)
+
 for learned_model in learned_models:
     visualize.display_table(learned_model)
 # -

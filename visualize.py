@@ -7,6 +7,9 @@ from config import RANDOM_STATE
 from matplotlib.colors import ListedColormap
 from sklearn.cluster import KMeans
 
+def get_custom_lines(y_text, colors):
+    return [plt.Line2D([0], [0], marker='o', color='w', label=y_text[i], markerfacecolor=colors[i], markersize=10) for i in range(len(y_text))]
+
 def show_correlation_matrix(df, title):
     correlation_matrix = df.corr()
 
@@ -35,13 +38,7 @@ def show_scatter_plot(X, y, y_text, colors, title):
     
     plt.scatter(X[:, 0], X[:, 1], c=y, cmap=ListedColormap(colors), edgecolor='k', s=150)
 
-    custom_lines = [plt.Line2D([0], [0], 
-                               marker='o', 
-                               color='w', 
-                               label=y_text[i], 
-                               markerfacecolor=colors[i], 
-                               markersize=10) 
-                    for i in range(len(y_text))]
+    custom_lines = get_custom_lines(y_text, colors)
 
     plt.legend(handles=custom_lines)
     plt.title(title)
@@ -68,26 +65,49 @@ def show_cluster_plot(k, X, y, y_text, colors, title):
     plt.xlim(x_min, x_max)
     plt.ylim(y_min, y_max)
 
-    custom_lines = [plt.Line2D([0], [0], 
-                               marker='o', 
-                               color='w', 
-                               label=y_text[i], 
-                               markerfacecolor=colors[i], 
-                               markersize=10) 
-                    for i in range(len(y_text))]
+    custom_lines = get_custom_lines(y_text, colors)
+    
     custom_lines.append(plt.Line2D([0], [0], 
                                marker='.', 
                                color='w', 
                                label='Centroids', 
                                markerfacecolor='k', 
-                               markersize=10)
-                       )
+                               markersize=10))
     
     plt.scatter(X[:, 0], X[:, 1], c=y, cmap=cmap, edgecolor='k', s=150)
 
     plt.scatter(centroids[:, 0], centroids[:, 1], c='k', marker='.', edgecolor='k', s=150)
     plt.legend(handles=custom_lines)
     plt.title(title)
+    plt.show()
+
+
+def show_svc_decision_boundary(X, y, y_text, model, colors, title):
+    plt.figure(figsize=(8, 6))
+    sns.scatterplot(x=X[:, 0], y=X[:, 1], hue=y, palette=colors, s=50, edgecolor="k")
+    
+    x_min, x_max = X[:, 0].min() - 10, X[:, 0].max() + 10
+    y_min, y_max = X[:, 1].min() - 10, X[:, 1].max() + 10
+    xx, yy = np.meshgrid(np.linspace(x_min, x_max, 100), np.linspace(y_min, y_max, 100))
+
+    Z = model.decision_function(np.c_[xx.ravel(), yy.ravel()])
+    
+    if len(np.unique(y)) == 2:
+        Z = Z.reshape(xx.shape)
+        plt.contour(xx, yy, Z, levels=[0], linestyles='-', colors='k')
+    else:
+        n_classes = Z.shape[1]
+        Z = Z.reshape(xx.shape[0], xx.shape[1], n_classes)
+        
+        for i in range(n_classes):
+            plt.contour(xx, yy, Z[:, :, i], levels=[0], linestyles='-', colors=colors[i])
+    
+    custom_lines = get_custom_lines(y_text, colors)
+    
+    plt.title(title)
+    plt.xlabel('Component 1')
+    plt.ylabel('Component 2')
+    plt.legend(handles=custom_lines)
     plt.show()
 
 
