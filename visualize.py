@@ -48,6 +48,29 @@ def show_scatter_plot(X, y, y_text, colors, title):
     plt.show()
 
 
+def show_3D_scatter_plot(X, y, y_text, colors, title):
+    fig, axs = plt.subplots(1, 3, figsize=(18, 8), subplot_kw={'projection': '3d'})
+
+    view_angles = [(45, 45), (30, 60), (90, 0)]
+    
+    for i, ax in enumerate(axs):
+        ax.scatter(X[:, 0], X[:, 1], X[:, 2], c=y, cmap=ListedColormap(colors), s=50, edgecolor='k', alpha=0.6)
+        
+        ax.view_init(elev=view_angles[i][0], azim=view_angles[i][1])
+        
+        ax.set_xlabel('Cmp 1')
+        ax.set_ylabel('Cmp 2')
+        ax.set_zlabel('Cmp 3')
+
+        ax.set_title(f'({view_angles[i][0]}, {view_angles[i][1]})')
+
+    custom_lines = get_custom_lines(y_text, colors)
+    fig.suptitle(title, fontsize=16)
+    fig.legend(handles=custom_lines, loc='upper left')
+    plt.tight_layout()
+    plt.show()
+
+
 def show_cluster_plot(k, X, y, y_text, colors, title):
     kmeans = KMeans(n_clusters=k, random_state=RANDOM_STATE)
     predicts = kmeans.fit_predict(X)

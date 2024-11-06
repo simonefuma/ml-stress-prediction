@@ -199,6 +199,9 @@ pca_3d = PCA(n_components=3)
 X_3d = pca_3d.fit_transform(StandardScaler().fit_transform(X))
 pd.DataFrame(pca_3d.components_, columns=X.columns, index=[f'Cmp {i+1}' for i in range(pca_3d.n_components_)])
 
+visualize.show_3D_scatter_plot(X_3d, y_2, y_unique_text_2, ['b', 'm'], 'Scatter Plot (df2)')
+visualize.show_3D_scatter_plot(X_3d, y_3, y_unique_text_3, ['b', 'm', 'g'], 'Scatter Plot (df3)')
+
 # K-Means
 visualize.show_cluster_table(2, X, y_2, y_unique_text_2, 'df_2')
 visualize.show_cluster_table(3, X, y_3, y_unique_text_3, 'df_3')
