@@ -53,15 +53,18 @@ def show_cluster_plot(k, X, y, y_text, colors, title):
     predicts = kmeans.fit_predict(X)
     centroids = kmeans.cluster_centers_;
 
+    # Definisci i limiti del grafico
     x_min, x_max = X[:, 0].min() - 5, X[:, 0].max() + 5
     y_min, y_max = X[:, 1].min() - 5, X[:, 1].max() + 5
     xx, yy = np.meshgrid(np.linspace(x_min, x_max, 1000), np.linspace(y_min, y_max, 1000))
+    
+    # Predici i cluster su tutto il piano e ridimensiona per visualizzare
     Z = kmeans.predict(np.c_[xx.ravel(), yy.ravel()])
     Z = Z.reshape(xx.shape)
     
-    cmap = ListedColormap(colors)
+    # Disegna solo le linee di confine dei cluster
     plt.figure(figsize=(8, 6))
-    plt.contourf(xx, yy, Z, cmap=cmap, alpha=0.3)
+    plt.contour(xx, yy, Z, colors='black', linewidths=0.5)
     plt.xlim(x_min, x_max)
     plt.ylim(y_min, y_max)
 
@@ -74,7 +77,7 @@ def show_cluster_plot(k, X, y, y_text, colors, title):
                                markerfacecolor='k', 
                                markersize=10))
     
-    plt.scatter(X[:, 0], X[:, 1], c=y, cmap=cmap, edgecolor='k', s=150)
+    plt.scatter(X[:, 0], X[:, 1], c=y, cmap=ListedColormap(colors), edgecolor='k', s=150)
 
     plt.scatter(centroids[:, 0], centroids[:, 1], c='k', marker='.', edgecolor='k', s=150)
     plt.legend(handles=custom_lines)
