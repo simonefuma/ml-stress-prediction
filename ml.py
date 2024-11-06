@@ -29,21 +29,16 @@ def get_binary_scorers():
 
 
 def get_multiclass_scorers():
+    specificity_score = lambda y_true, y_pred: metrics.recall_score(y_true, y_pred, average='macro', labels=[0, 1, 2])
+    specificity_score.__name__ = 'specificity_score'
+
     multiclass_scorers = [metrics.accuracy_score]
-    specificity_score_macro = lambda y_true, y_pred: metrics.recall_score(y_true, y_pred, average='macro', labels=[0, 1, 2])
-    specificity_score_macro.__name__ = 'specificity_score_macro'
-    specificity_score_micro = lambda y_true, y_pred: metrics.recall_score(y_true, y_pred, average='micro', labels=[0, 1, 2])
-    specificity_score_micro.__name__ = 'specificity_score_micro'
-    specificity_score_weighted = lambda y_true, y_pred: metrics.recall_score(y_true, y_pred, average='weighted', labels=[0, 1, 2])
-    specificity_score_weighted.__name__ = 'specificity_score_weighted'
-    multiclass_scorers += [specificity_score_macro, specificity_score_micro, specificity_score_weighted]
 
     for score in [metrics.f1_score, metrics.precision_score, metrics.recall_score]:
-        for average in ['macro', 'micro', 'weighted']:
-            multiclass_score = lambda y_true, y_pred, score=score, average=average: score(y_true, y_pred, average=average, zero_division=0)
-            multiclass_score.__name__ = f'{score.__name__}_{average}'
+            multiclass_score = lambda y_true, y_pred, score=score : score(y_true, y_pred, average='macro', zero_division=0)
+            multiclass_score.__name__ = score.__name__
             multiclass_scorers.append(multiclass_score)
-    
+    multiclass_scorers.append(specificity_score)
     return multiclass_scorers
     
 
