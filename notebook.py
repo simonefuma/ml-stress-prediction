@@ -187,13 +187,17 @@ learned_models = ml.learn_models(X_2d,
                                  test_scorers=ml.get_multiclass_scorers(), 
                                  index_test_scorer=0, 
                                  minimize_test_scorer=False, 
-                                 replace=True)
+                                 replace=False)
 
 for learned_model in learned_models:
     visualize.display_table(learned_model)
     visualize.show_svc_decision_boundary(X_2d, y_3, y_unique_text_3, learned_model['model'], ['b', 'm', 'g'], 
                                          'SVC Decision Boundary ' + learned_model['model_name'])
 # -
+
+pca_3d = PCA(n_components=3)
+X_3d = pca_3d.fit_transform(StandardScaler().fit_transform(X))
+pd.DataFrame(pca_3d.components_, columns=X.columns, index=[f'Cmp {i+1}' for i in range(pca_3d.n_components_)])
 
 # K-Means
 visualize.show_cluster_table(2, X, y_2, y_unique_text_2, 'df_2')
