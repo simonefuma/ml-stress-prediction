@@ -70,7 +70,7 @@ pca = PCA(n_components=len(X.columns))
 pca.fit(StandardScaler().fit_transform(X))
 
 explained_variance = np.cumsum(pca.explained_variance_ratio_)
-n_min_components = np.argmax(explained_variance > 0.9)+1
+min_components = np.argmax(explained_variance > 0.9)+1
 
 plt.figure(figsize=(8, 5))
 plt.plot(range(1, len(explained_variance) + 1), explained_variance, marker='o')
@@ -121,10 +121,12 @@ for learned_model in learned_models:
                                          'SVC Decision Boundary ' + learned_model['model_name'])
 # -
 
+# PCA con 3 componenti
 pca_3d = PCA(n_components=3)
 X_3d = pca_3d.fit_transform(StandardScaler().fit_transform(X))
 pd.DataFrame(pca_3d.components_, columns=X.columns, index=[f'Cmp {i+1}' for i in range(pca_3d.n_components_)])
 
+# Scatter Plot 3D dei dati trasformati da PCA con 3 componenti
 visualize.show_3D_scatter_plot(X_3d, y_2, y_unique_text_2, ['b', 'm'], 'Scatter Plot (df2)')
 visualize.show_3D_scatter_plot(X_3d, y_3, y_unique_text_3, ['b', 'm', 'g'], 'Scatter Plot (df3)')
 
@@ -153,6 +155,33 @@ for learned_model in learned_models:
     visualize.display_table(learned_model)
     visualize.show_svc_decision_boundary_3D(X_3d, y_3, y_unique_text_3, learned_model['model'].named_steps['classifier'], ['b', 'm', 'g'], 
                                             'SVC Decision Boundary ' + learned_model['model_name'])
+# -
+
+pca_min_components = PCA(n_components=min_components)
+X_min_components = pca_min_components.fit_transform(StandardScaler().fit_transform(X))
+pd.DataFrame(pca_min_components.components_, columns=X.columns, index=[f'Cmp {i+1}' for i in range(pca_min_components.n_components_)])
+
+# +
+# SVC_KERNELS_MIN_COMPONENTS_T2
+learned_models = ml.learn_models(X_min_components, y_2.values, ml.SVC_KERNELS_MIN_COMPONENTS_T2, 
+                                 StratifiedKFold(n_splits=8, shuffle=True, random_state=RANDOM_STATE),
+                                 StratifiedKFold(n_splits=7, shuffle=True, random_state=RANDOM_STATE),
+                                 test_scorers=ml.get_binary_scorers(), index_test_scorer=0, minimize_test_scorer=False, 
+                                 replace=False)
+
+for learned_model in learned_models:
+    visualize.display_table(learned_model)
+
+# +
+# SVC_KERNELS_MIN_COMPONENTS_T3
+learned_models = ml.learn_models(X_min_components, y_3.values, ml.SVC_KERNELS_MIN_COMPONENTS_T3, 
+                                 StratifiedKFold(n_splits=8, shuffle=True, random_state=RANDOM_STATE),
+                                 StratifiedKFold(n_splits=7, shuffle=True, random_state=RANDOM_STATE),
+                                 test_scorers=ml.get_multiclass_scorers(), index_test_scorer=0, minimize_test_scorer=False, 
+                                 replace=False)
+
+for learned_model in learned_models:
+    visualize.display_table(learned_model)
 # -
 
 # K-Means_X_T2, K-Means_X_T3

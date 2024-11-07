@@ -139,6 +139,66 @@ SVC_KERNELS_X3_T3 = [
     }
 ]
 
+SVC_KERNELS_MIN_COMPONENTS_T2 = [
+    {
+        'model': SVC(kernel='linear'),
+        'name': 'SVC_linear_MIN_COMPONENTS_T2',
+        'param_grid':
+        {
+            'C': [0.01, 0.1, 1, 10, 100],
+        }
+    },
+    {
+        'model': SVC(kernel='poly'),
+        'name': 'SVC_poly_MIN_COMPONENTS_T2',
+        'param_grid':
+        {
+            'C': [0.01, 0.1, 1, 10, 100],
+            'degree': [2, 3, 4, 5],
+            'gamma': ['scale', 'auto', 0.001, 0.01, 0.1, 1]
+        }
+    },
+    {
+        'model': SVC(kernel='rbf'),
+        'name': 'SVC_rbf_MIN_COMPONENTS_T2',
+        'param_grid':
+        {
+            'C': [0.01, 0.1, 1, 10, 100],
+            'gamma': ['scale', 'auto', 0.001, 0.01, 0.1, 1]
+        }
+    }
+]
+
+SVC_KERNELS_MIN_COMPONENTS_T3 = [
+    {
+        'model': SVC(kernel='linear'),
+        'name': 'SVC_linear_MIN_COMPONENTS_T3',
+        'param_grid':
+        {
+            'C': [0.01, 0.1, 1, 10, 100],
+        }
+    },
+    {
+        'model': SVC(kernel='poly'),
+        'name': 'SVC_poly_MIN_COMPONENTS_T3',
+        'param_grid':
+        {
+            'C': [0.01, 0.1, 1, 10, 100],
+            'degree': [2, 3, 4, 5],
+            'gamma': ['scale', 'auto', 0.001, 0.01, 0.1, 1]
+        }
+    },
+    {
+        'model': SVC(kernel='rbf'),
+        'name': 'SVC_rbf_MIN_COMPONENTS_T3',
+        'param_grid':
+        {
+            'C': [0.01, 0.1, 1, 10, 100],
+            'gamma': ['scale', 'auto', 0.001, 0.01, 0.1, 1]
+        }
+    }
+]
+
 MODELS_X_T2 = [
     {
         'model': KNeighborsClassifier(),
