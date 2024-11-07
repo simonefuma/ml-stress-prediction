@@ -6,6 +6,7 @@ import seaborn as sns
 from config import RANDOM_STATE
 from matplotlib.colors import ListedColormap
 from sklearn.cluster import KMeans
+from sklearn.inspection import DecisionBoundaryDisplay
 
 def get_custom_lines(y_text, colors):
     return [plt.Line2D([0], [0], marker='o', color='w', label=y_text[i], markerfacecolor=colors[i], markersize=10) for i in range(len(y_text))]
@@ -110,35 +111,67 @@ def show_cluster_plot(k, X, y, y_text, colors, title):
 
 def show_svc_decision_boundary(X, y, y_text, model, colors, title):
     plt.figure(figsize=(8, 6))
-    sns.scatterplot(x=X[:, 0], y=X[:, 1], hue=y, palette=colors, s=50, edgecolor="k")
-    
-    x_min, x_max = X[:, 0].min() - 10, X[:, 0].max() + 10
-    y_min, y_max = X[:, 1].min() - 10, X[:, 1].max() + 10
-    xx, yy = np.meshgrid(np.linspace(x_min, x_max, 100), np.linspace(y_min, y_max, 100))
 
-    Z = model.decision_function(np.c_[xx.ravel(), yy.ravel()])
-    
-    if len(np.unique(y)) == 2:
-        Z = Z.reshape(xx.shape)
-        plt.contour(xx, yy, Z, levels=[0], linestyles='-', colors='k')
-    else:
-        n_classes = Z.shape[1]
-        Z = Z.reshape(xx.shape[0], xx.shape[1], n_classes)
-        
-        for i in range(n_classes):
-            plt.contour(xx, yy, Z[:, :, i], levels=[0], linestyles='-', colors=colors[i])
-    
+    display = DecisionBoundaryDisplay.from_estimator(
+        model,
+        X,
+        grid_resolution=1000,
+        xlabel='Component 1',
+        ylabel='Component 2',
+        response_method="predict",
+        cmap=ListedColormap(colors),
+        alpha=0.7,
+    )
+
+    display.plot(ax=plt.gca(), cmap=plt.cm.coolwarm, alpha=0.3)
+    plt.scatter(X[:, 0], X[:, 1], c=y, cmap=ListedColormap(colors), s=50, edgecolor='k', label=y_text)
     custom_lines = get_custom_lines(y_text, colors)
-    
+
     plt.title(title)
-    plt.xlabel('Component 1')
-    plt.ylabel('Component 2')
     plt.legend(handles=custom_lines)
+
     plt.show()
 
 
 def show_svc_decision_boundary_3D(X, y, y_text, model, colors, title):
-    pass
+    # 1. Creare una griglia tridimensionale di punti per tracciare il confine decisionale
+    x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
+    y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
+    z_min, z_max = X[:, 2].min() - 1, X[:, 2].max() + 1
+
+    xx, yy, zz = np.meshgrid(
+        np.linspace(x_min, x_max, 30),
+        np.linspace(y_min, y_max, 30),
+        np.linspace(z_min, z_max, 30)
+    )
+
+    # 2. Calcolare i valori di decisione per ogni punto nella griglia
+    grid_points = np.c_[xx.ravel(), yy.ravel(), zz.ravel()]
+    decision_values = model.decision_function(grid_points)
+    decision_values = decision_values.reshape(xx.shape)
+
+    # 3. Creare il grafico 3D
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    ax.set_title(title)
+    ax.set_xlabel("Component 1")
+    ax.set_ylabel("Component 2")
+    ax.set_zlabel("Component 3")
+
+    # 4. Visualizzare i punti dati originali
+    for i, label in enumerate(np.unique(y)):
+        ax.scatter(
+            X[y == label, 0], X[y == label, 1], X[y == label, 2],
+            color=colors[i], label=y_text[label], s=30
+        )
+
+    # 5. Aggiungere il confine decisionale
+    # Il confine decisionale è il livello 0 della superficie
+    ax.contourf(xx, yy, zz, decision_values, levels=[-1, 0, 1], alpha=0.3, colors=colors[:2])
+
+    # 6. Mostrare il grafico con la legenda
+    ax.legend()
+    plt.show()
 
 
 def show_cluster_table(k, X, y, y_text, title):

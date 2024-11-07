@@ -140,8 +140,8 @@ learned_models = ml.learn_models(X_3d, y_2.values, ml.get_svc_kernels_models('_X
 
 for learned_model in learned_models:
     visualize.display_table(learned_model)
-    visualize.show_svc_decision_boundary_3D(X_3d, y_2, y_unique_text_2, learned_model['model'].named_steps['classifier'], ['b', 'm', 'g'], 
-                                            'SVC Decision Boundary ' + learned_model['model_name'])
+    #visualize.show_svc_decision_boundary_3D(X_3d, y_2, y_unique_text_2, learned_model['model'].named_steps['classifier'], ['b', 'm', 'g'], 
+    #                                        'SVC Decision Boundary ' + learned_model['model_name'])
 
 # +
 # SVC_KERNELS_X3_T3
@@ -153,8 +153,8 @@ learned_models = ml.learn_models(X_3d, y_3.values, ml.get_svc_kernels_models('_X
 
 for learned_model in learned_models:
     visualize.display_table(learned_model)
-    visualize.show_svc_decision_boundary_3D(X_3d, y_3, y_unique_text_3, learned_model['model'].named_steps['classifier'], ['b', 'm', 'g'], 
-                                            'SVC Decision Boundary ' + learned_model['model_name'])
+    #visualize.show_svc_decision_boundary_3D(X_3d, y_3, y_unique_text_3, learned_model['model'].named_steps['classifier'], ['b', 'm', 'g'], 
+    #                                        'SVC Decision Boundary ' + learned_model['model_name'])
 # -
 
 pca_min_components = PCA(n_components=min_components)
