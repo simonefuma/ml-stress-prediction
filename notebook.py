@@ -136,7 +136,7 @@ learned_models = ml.learn_models(X_2d,
                                  y_2.values, 
                                  models, 
                                  StratifiedKFold(n_splits=8, shuffle=True, random_state=RANDOM_STATE),
-                                 StratifiedKFold(n_splits=3, shuffle=True, random_state=RANDOM_STATE),
+                                 StratifiedKFold(n_splits=7, shuffle=True, random_state=RANDOM_STATE),
                                  test_scorers=ml.get_binary_scorers(), 
                                  index_test_scorer=0, 
                                  minimize_test_scorer=False, 
@@ -201,6 +201,99 @@ pd.DataFrame(pca_3d.components_, columns=X.columns, index=[f'Cmp {i+1}' for i in
 
 visualize.show_3D_scatter_plot(X_3d, y_2, y_unique_text_2, ['b', 'm'], 'Scatter Plot (df2)')
 visualize.show_3D_scatter_plot(X_3d, y_3, y_unique_text_3, ['b', 'm', 'g'], 'Scatter Plot (df3)')
+
+# +
+models = [
+    {
+        'model': SVC(kernel='linear'),
+        'name': 'SVC_linear_X3_T2',
+        'param_grid':
+        {
+            'C': [0.01, 0.1, 1, 10, 100],
+        }
+    },
+    {
+        'model': SVC(kernel='poly'),
+        'name': 'SVC_poly_X3_T2',
+        'param_grid':
+        {
+            'C': [0.01, 0.1, 1, 10, 100],
+            'degree': [2, 3, 4, 5],
+            'gamma': ['scale', 'auto', 0.001, 0.01, 0.1, 1]
+        }
+    },
+    {
+        'model': SVC(kernel='rbf'),
+        'name': 'SVC_rbf_X3_T2',
+        'param_grid':
+        {
+            'C': [0.01, 0.1, 1, 10, 100],
+            'gamma': ['scale', 'auto', 0.001, 0.01, 0.1, 1]
+        }
+    }
+]
+
+learned_models = ml.learn_models(X_3d, 
+                                 y_2.values, 
+                                 models, 
+                                 StratifiedKFold(n_splits=8, shuffle=True, random_state=RANDOM_STATE),
+                                 StratifiedKFold(n_splits=7, shuffle=True, random_state=RANDOM_STATE),
+                                 test_scorers=ml.get_binary_scorers(), 
+                                 index_test_scorer=0, 
+                                 minimize_test_scorer=False, 
+                                 replace=False)
+
+for learned_model in learned_models:
+    visualize.display_table(learned_model)
+    visualize.show_svc_decision_boundary_3D(X_3d, y_2, y_unique_text_2, learned_model['model'].named_steps['classifier'], ['b', 'm', 'g'], 
+                                            'SVC Decision Boundary ' + learned_model['model_name'])
+
+# +
+models = [
+    {
+        'model': SVC(kernel='linear'),
+        'name': 'SVC_linear_X3_T3',
+        'param_grid':
+        {
+            'C': [0.01, 0.1, 1, 10, 100],
+        }
+    },
+    {
+        'model': SVC(kernel='poly'),
+        'name': 'SVC_poly_X3_T3',
+        'param_grid':
+        {
+            'C': [0.01, 0.1, 1, 10, 100],
+            'degree': [2, 3, 4, 5],
+            'gamma': ['scale', 'auto', 0.001, 0.01, 0.1, 1]
+        }
+    },
+    {
+        'model': SVC(kernel='rbf'),
+        'name': 'SVC_rbf_X3_T3',
+        'param_grid':
+        {
+            'C': [0.01, 0.1, 1, 10, 100],
+            'gamma': ['scale', 'auto', 0.001, 0.01, 0.1, 1]
+        }
+    }
+]
+
+learned_models = ml.learn_models(X_3d, 
+                                 y_3.values, 
+                                 models, 
+                                 StratifiedKFold(n_splits=8, shuffle=True, random_state=RANDOM_STATE),
+                                 StratifiedKFold(n_splits=7, shuffle=True, random_state=RANDOM_STATE),
+                                 test_scorers=ml.get_multiclass_scorers(), 
+                                 index_test_scorer=0, 
+                                 minimize_test_scorer=False, 
+                                 replace=False)
+
+for learned_model in learned_models:
+    visualize.display_table(learned_model)
+    visualize.show_svc_decision_boundary_3D(X_3d, y_3, y_unique_text_3, learned_model['model'].named_steps['classifier'], ['b', 'm', 'g'], 
+                                            'SVC Decision Boundary ' + learned_model['model_name'])
+# -
 
 # K-Means
 visualize.show_cluster_table(2, X, y_2, y_unique_text_2, 'df_2')

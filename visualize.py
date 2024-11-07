@@ -137,6 +137,10 @@ def show_svc_decision_boundary(X, y, y_text, model, colors, title):
     plt.show()
 
 
+def show_svc_decision_boundary_3D(X, y, y_text, model, colors, title):
+    pass
+
+
 def show_cluster_table(k, X, y, y_text, title):
     kmeans = KMeans(n_clusters=k, random_state=RANDOM_STATE)
     predicts = kmeans.fit_predict(X)
