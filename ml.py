@@ -19,10 +19,10 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 
-SVC_KERNELS_X2_T2 = [
+SVC_KERNELS = [
     {
         'model': SVC(kernel='linear'),
-        'name': 'SVC_linear_X2_T2',
+        'name': 'SVC_linear',
         'param_grid':
         {
             'C': [0.01, 0.1, 1, 10, 100],
@@ -30,7 +30,7 @@ SVC_KERNELS_X2_T2 = [
     },
     {
         'model': SVC(kernel='poly'),
-        'name': 'SVC_poly_X2_T2',
+        'name': 'SVC_poly',
         'param_grid':
         {
             'C': [0.01, 0.1, 1, 10, 100],
@@ -40,157 +40,7 @@ SVC_KERNELS_X2_T2 = [
     },
     {
         'model': SVC(kernel='rbf'),
-        'name': 'SVC_rbf_X2_T2',
-        'param_grid':
-        {
-            'C': [0.01, 0.1, 1, 10, 100],
-            'gamma': ['scale', 'auto', 0.001, 0.01, 0.1, 1]
-        }
-    }
-]
-
-SVC_KERNELS_X2_T3 = [
-    {
-        'model': SVC(kernel='linear'),
-        'name': 'SVC_linear_X2_T3',
-        'param_grid':
-        {
-            'C': [0.01, 0.1, 1, 10, 100],
-        }
-    },
-    {
-        'model': SVC(kernel='poly'),
-        'name': 'SVC_poly_X2_T3',
-        'param_grid':
-        {
-            'C': [0.01, 0.1, 1, 10, 100],
-            'degree': [2, 3, 4, 5],
-            'gamma': ['scale', 'auto', 0.001, 0.01, 0.1, 1]
-        }
-    },
-    {
-        'model': SVC(kernel='rbf'),
-        'name': 'SVC_rbf_X2_T3',
-        'param_grid':
-        {
-            'C': [0.01, 0.1, 1, 10, 100],
-            'gamma': ['scale', 'auto', 0.001, 0.01, 0.1, 1]
-        }
-    }
-]
-
-SVC_KERNELS_X3_T2 = [
-    {
-        'model': SVC(kernel='linear'),
-        'name': 'SVC_linear_X3_T2',
-        'param_grid':
-        {
-            'C': [0.01, 0.1, 1, 10, 100],
-        }
-    },
-    {
-        'model': SVC(kernel='poly'),
-        'name': 'SVC_poly_X3_T2',
-        'param_grid':
-        {
-            'C': [0.01, 0.1, 1, 10, 100],
-            'degree': [2, 3, 4, 5],
-            'gamma': ['scale', 'auto', 0.001, 0.01, 0.1, 1]
-        }
-    },
-    {
-        'model': SVC(kernel='rbf'),
-        'name': 'SVC_rbf_X3_T2',
-        'param_grid':
-        {
-            'C': [0.01, 0.1, 1, 10, 100],
-            'gamma': ['scale', 'auto', 0.001, 0.01, 0.1, 1]
-        }
-    }
-]
-
-SVC_KERNELS_X3_T3 = [
-    {
-        'model': SVC(kernel='linear'),
-        'name': 'SVC_linear_X3_T3',
-        'param_grid':
-        {
-            'C': [0.01, 0.1, 1, 10, 100],
-        }
-    },
-    {
-        'model': SVC(kernel='poly'),
-        'name': 'SVC_poly_X3_T3',
-        'param_grid':
-        {
-            'C': [0.01, 0.1, 1, 10, 100],
-            'degree': [2, 3, 4, 5],
-            'gamma': ['scale', 'auto', 0.001, 0.01, 0.1, 1]
-        }
-    },
-    {
-        'model': SVC(kernel='rbf'),
-        'name': 'SVC_rbf_X3_T3',
-        'param_grid':
-        {
-            'C': [0.01, 0.1, 1, 10, 100],
-            'gamma': ['scale', 'auto', 0.001, 0.01, 0.1, 1]
-        }
-    }
-]
-
-SVC_KERNELS_MIN_COMPONENTS_T2 = [
-    {
-        'model': SVC(kernel='linear'),
-        'name': 'SVC_linear_MIN_COMPONENTS_T2',
-        'param_grid':
-        {
-            'C': [0.01, 0.1, 1, 10, 100],
-        }
-    },
-    {
-        'model': SVC(kernel='poly'),
-        'name': 'SVC_poly_MIN_COMPONENTS_T2',
-        'param_grid':
-        {
-            'C': [0.01, 0.1, 1, 10, 100],
-            'degree': [2, 3, 4, 5],
-            'gamma': ['scale', 'auto', 0.001, 0.01, 0.1, 1]
-        }
-    },
-    {
-        'model': SVC(kernel='rbf'),
-        'name': 'SVC_rbf_MIN_COMPONENTS_T2',
-        'param_grid':
-        {
-            'C': [0.01, 0.1, 1, 10, 100],
-            'gamma': ['scale', 'auto', 0.001, 0.01, 0.1, 1]
-        }
-    }
-]
-
-SVC_KERNELS_MIN_COMPONENTS_T3 = [
-    {
-        'model': SVC(kernel='linear'),
-        'name': 'SVC_linear_MIN_COMPONENTS_T3',
-        'param_grid':
-        {
-            'C': [0.01, 0.1, 1, 10, 100],
-        }
-    },
-    {
-        'model': SVC(kernel='poly'),
-        'name': 'SVC_poly_MIN_COMPONENTS_T3',
-        'param_grid':
-        {
-            'C': [0.01, 0.1, 1, 10, 100],
-            'degree': [2, 3, 4, 5],
-            'gamma': ['scale', 'auto', 0.001, 0.01, 0.1, 1]
-        }
-    },
-    {
-        'model': SVC(kernel='rbf'),
-        'name': 'SVC_rbf_MIN_COMPONENTS_T3',
+        'name': 'SVC_rbf',
         'param_grid':
         {
             'C': [0.01, 0.1, 1, 10, 100],
@@ -271,6 +121,13 @@ def get_multiclass_scorers():
             multiclass_scorers.append(multiclass_score)
     multiclass_scorers.append(specificity_score)
     return multiclass_scorers
+
+
+def get_svc_kernels_models(postfix):
+    return [{'model': svc_kernel['model'], 
+             'name': svc_kernel['name']+postfix, 
+             'param_grid': svc_kernel['param_grid']} 
+            for svc_kernel in SVC_KERNELS]
     
 
 def np_jsonify(data):
