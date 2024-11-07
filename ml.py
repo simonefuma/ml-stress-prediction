@@ -1,7 +1,7 @@
 import copy
 import itertools as it
-import json
 import joblib
+import json
 import logging
 import numpy as np
 import os
@@ -11,9 +11,180 @@ from pathlib import Path
 
 from config import RANDOM_STATE
 import sklearn.metrics as metrics
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import StratifiedKFold
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from sklearn.svm import SVC
+from sklearn.tree import DecisionTreeClassifier
+
+SVC_KERNELS_X2_T2 = [
+    {
+        'model': SVC(kernel='linear'),
+        'name': 'SVC_linear_X2_T2',
+        'param_grid':
+        {
+            'C': [0.01, 0.1, 1, 10, 100],
+        }
+    },
+    {
+        'model': SVC(kernel='poly'),
+        'name': 'SVC_poly_X2_T2',
+        'param_grid':
+        {
+            'C': [0.01, 0.1, 1, 10, 100],
+            'degree': [2, 3, 4, 5],
+            'gamma': ['scale', 'auto', 0.001, 0.01, 0.1, 1]
+        }
+    },
+    {
+        'model': SVC(kernel='rbf'),
+        'name': 'SVC_rbf_X2_T2',
+        'param_grid':
+        {
+            'C': [0.01, 0.1, 1, 10, 100],
+            'gamma': ['scale', 'auto', 0.001, 0.01, 0.1, 1]
+        }
+    }
+]
+
+SVC_KERNELS_X2_T3 = [
+    {
+        'model': SVC(kernel='linear'),
+        'name': 'SVC_linear_X2_T3',
+        'param_grid':
+        {
+            'C': [0.01, 0.1, 1, 10, 100],
+        }
+    },
+    {
+        'model': SVC(kernel='poly'),
+        'name': 'SVC_poly_X2_T3',
+        'param_grid':
+        {
+            'C': [0.01, 0.1, 1, 10, 100],
+            'degree': [2, 3, 4, 5],
+            'gamma': ['scale', 'auto', 0.001, 0.01, 0.1, 1]
+        }
+    },
+    {
+        'model': SVC(kernel='rbf'),
+        'name': 'SVC_rbf_X2_T3',
+        'param_grid':
+        {
+            'C': [0.01, 0.1, 1, 10, 100],
+            'gamma': ['scale', 'auto', 0.001, 0.01, 0.1, 1]
+        }
+    }
+]
+
+SVC_KERNELS_X3_T2 = [
+    {
+        'model': SVC(kernel='linear'),
+        'name': 'SVC_linear_X3_T2',
+        'param_grid':
+        {
+            'C': [0.01, 0.1, 1, 10, 100],
+        }
+    },
+    {
+        'model': SVC(kernel='poly'),
+        'name': 'SVC_poly_X3_T2',
+        'param_grid':
+        {
+            'C': [0.01, 0.1, 1, 10, 100],
+            'degree': [2, 3, 4, 5],
+            'gamma': ['scale', 'auto', 0.001, 0.01, 0.1, 1]
+        }
+    },
+    {
+        'model': SVC(kernel='rbf'),
+        'name': 'SVC_rbf_X3_T2',
+        'param_grid':
+        {
+            'C': [0.01, 0.1, 1, 10, 100],
+            'gamma': ['scale', 'auto', 0.001, 0.01, 0.1, 1]
+        }
+    }
+]
+
+SVC_KERNELS_X3_T3 = [
+    {
+        'model': SVC(kernel='linear'),
+        'name': 'SVC_linear_X3_T3',
+        'param_grid':
+        {
+            'C': [0.01, 0.1, 1, 10, 100],
+        }
+    },
+    {
+        'model': SVC(kernel='poly'),
+        'name': 'SVC_poly_X3_T3',
+        'param_grid':
+        {
+            'C': [0.01, 0.1, 1, 10, 100],
+            'degree': [2, 3, 4, 5],
+            'gamma': ['scale', 'auto', 0.001, 0.01, 0.1, 1]
+        }
+    },
+    {
+        'model': SVC(kernel='rbf'),
+        'name': 'SVC_rbf_X3_T3',
+        'param_grid':
+        {
+            'C': [0.01, 0.1, 1, 10, 100],
+            'gamma': ['scale', 'auto', 0.001, 0.01, 0.1, 1]
+        }
+    }
+]
+
+MODELS_X_T2 = [
+    {
+        'model': KNeighborsClassifier(),
+        'name': 'KNeighborsClassifier_X_T2',
+        'param_grid': 
+        {
+            'n_neighbors': [1, 3, 5, 7, 9, 11],
+            'metric': ['cityblock', 'cosine', 'euclidean', 'l2', 'l1', 'manhattan', 'nan_euclidean']
+        }
+    },
+    {
+        'model': SVC(),
+        'name': 'SVC_X_T2',
+        'param_grid':
+        {
+            'C': [0.01, 0.1, 1, 10, 100],
+            'kernel': ['linear', 'poly', 'rbf', 'sigmoid'],
+            'degree': [2, 3, 4, 5],
+            'gamma': ['scale', 'auto', 0.001, 0.01, 0.1, 1]
+        }
+    },
+    {
+        'model': DecisionTreeClassifier(random_state=RANDOM_STATE),
+        'name': 'DecisionTreeClassifier_X_T2',
+        'param_grid':
+        {
+            'criterion': ['gini', 'entropy', 'log_loss'],
+            'splitter': ['best', 'random'],
+            'max_depth': [None, 1, 2, 3, 4, 5, 10, 15, 20],
+            'min_samples_split': [0.01, 0.05, 0.1, 0.2, 0.3],
+            'min_samples_leaf': [1, 0.05, 0.1, 0.2, 0.3],
+        }
+    },
+    {
+        'model': RandomForestClassifier(bootstrap=False, random_state=RANDOM_STATE),
+        'name': 'RandomForestClassifier_X_T2',
+        'param_grid':
+        {
+            'n_estimators': [3, 5, 7],
+            'criterion': ['gini', 'entropy', 'log_loss'],
+            'max_depth': [None, 1, 2, 3, 4, 5, 10, 15, 20],
+            'min_samples_split': [0.01, 0.05, 0.1, 0.2, 0.3],
+            'min_samples_leaf': [1, 0.05, 0.1, 0.2, 0.3],
+        }
+    }
+]
 
 def get_binary_scorers():
     specificity_scorer = lambda y_true, y_pred: metrics.recall_score(y_true, y_pred, pos_label=0)
