@@ -132,7 +132,7 @@ visualize.show_3D_scatter_plot(X_3d, y_3, y_unique_text_3, ['b', 'm', 'g'], 'Sca
 
 # +
 # SVC_KERNELS_X3_T2
-learned_models = ml.learn_models(X_3d, y_2.values, ml.get_svc_kernels_models('_X2_T2'),
+learned_models = ml.learn_models(X_3d, y_2.values, ml.get_svc_kernels_models('_X3_T2'),
                                  StratifiedKFold(n_splits=8, shuffle=True, random_state=RANDOM_STATE),
                                  StratifiedKFold(n_splits=7, shuffle=True, random_state=RANDOM_STATE),
                                  test_scorers=ml.get_binary_scorers(), index_test_scorer=0, minimize_test_scorer=False, 
@@ -145,7 +145,7 @@ for learned_model in learned_models:
 
 # +
 # SVC_KERNELS_X3_T3
-learned_models = ml.learn_models(X_3d, y_3.values, ml.SVC_KERNELS_X3_T3, 
+learned_models = ml.learn_models(X_3d, y_3.values, ml.get_svc_kernels_models('_X2_T3'),
                                  StratifiedKFold(n_splits=8, shuffle=True, random_state=RANDOM_STATE),
                                  StratifiedKFold(n_splits=7, shuffle=True, random_state=RANDOM_STATE),
                                  test_scorers=ml.get_multiclass_scorers(), index_test_scorer=0, minimize_test_scorer=False, 
@@ -163,7 +163,7 @@ pd.DataFrame(pca_min_components.components_, columns=X.columns, index=[f'Cmp {i+
 
 # +
 # SVC_KERNELS_MIN_COMPONENTS_T2
-learned_models = ml.learn_models(X_min_components, y_2.values, ml.SVC_KERNELS_MIN_COMPONENTS_T2, 
+learned_models = ml.learn_models(X_min_components, y_2.values, ml.get_svc_kernels_models('_MIN_COMPONENTS_T2'),
                                  StratifiedKFold(n_splits=8, shuffle=True, random_state=RANDOM_STATE),
                                  StratifiedKFold(n_splits=7, shuffle=True, random_state=RANDOM_STATE),
                                  test_scorers=ml.get_binary_scorers(), index_test_scorer=0, minimize_test_scorer=False, 
@@ -174,7 +174,7 @@ for learned_model in learned_models:
 
 # +
 # SVC_KERNELS_MIN_COMPONENTS_T3
-learned_models = ml.learn_models(X_min_components, y_3.values, ml.SVC_KERNELS_MIN_COMPONENTS_T3, 
+learned_models = ml.learn_models(X_min_components, y_3.values, ml.get_svc_kernels_models('_MIN_COMPONENTS_T3'),
                                  StratifiedKFold(n_splits=8, shuffle=True, random_state=RANDOM_STATE),
                                  StratifiedKFold(n_splits=7, shuffle=True, random_state=RANDOM_STATE),
                                  test_scorers=ml.get_multiclass_scorers(), index_test_scorer=0, minimize_test_scorer=False, 
