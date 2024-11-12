@@ -78,16 +78,13 @@ def show_cluster_plot(k, X, y, y_text, colors, title):
     predicts = kmeans.fit_predict(X)
     centroids = kmeans.cluster_centers_;
 
-    # Definisci i limiti del grafico
     x_min, x_max = X[:, 0].min() - 5, X[:, 0].max() + 5
     y_min, y_max = X[:, 1].min() - 5, X[:, 1].max() + 5
     xx, yy = np.meshgrid(np.linspace(x_min, x_max, 1000), np.linspace(y_min, y_max, 1000))
     
-    # Predici i cluster su tutto il piano e ridimensiona per visualizzare
     Z = kmeans.predict(np.c_[xx.ravel(), yy.ravel()])
     Z = Z.reshape(xx.shape)
     
-    # Disegna solo le linee di confine dei cluster
     plt.figure(figsize=(8, 6))
     plt.contour(xx, yy, Z, colors='black', linewidths=0.5)
     plt.xlim(x_min, x_max)
@@ -110,28 +107,28 @@ def show_cluster_plot(k, X, y, y_text, colors, title):
     plt.show()
 
 
-def show_svc_decision_boundary(X, y, y_text, model, colors, title):
+def show_svc_decision_boundary(X, y, y_text, models, colors):
+    fig, axes = plt.subplots(1, 3, figsize=(18, 6))
     
-    plt.figure(figsize=(8, 6))
+    for i, model in enumerate(models):
+        ax = axes[i]
 
-    display = DecisionBoundaryDisplay.from_estimator(
-        model,
-        X,
-        grid_resolution=1000,
-        xlabel='Component 1',
-        ylabel='Component 2',
-        response_method="predict",
-        cmap=ListedColormap(colors),
-        alpha=0.7,
-    )
+        h = 0.02
+        x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
+        y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
+        xx, yy = np.meshgrid(np.arange(x_min, x_max, h), np.arange(y_min, y_max, h))
 
-    display.plot(ax=plt.gca(), cmap=ListedColormap(colors), alpha=0.3)
-    plt.scatter(X[:, 0], X[:, 1], c=y, cmap=ListedColormap(colors), s=50, edgecolor='k', label=y_text)
-    custom_lines = get_custom_lines(y_text, colors)
+        Z = model['model'].predict(np.c_[xx.ravel(), yy.ravel()])
+        Z = Z.reshape(xx.shape)
 
-    plt.title(title)
-    plt.legend(handles=custom_lines)
+        ax.contourf(xx, yy, Z, alpha=0.3, cmap=ListedColormap(colors))
+        ax.scatter(X[:, 0], X[:, 1], c=y, cmap=ListedColormap(colors), s=50, edgecolor='k', label=y_text)
+        ax.set_title(model['model_name'])
+        
+        custom_lines = get_custom_lines(y_text, colors)
+        ax.legend(handles=custom_lines)
 
+    plt.tight_layout()
     plt.show()
 
 
@@ -149,13 +146,22 @@ def show_cluster_table(k, X, y, y_text, title):
     display(cluster_table)
 
 
-def display_table(learned_model):
-    result_df = pd.DataFrame(learned_model['result'])
-    result_df[['avg', 'std']] = result_df[['avg', 'std']].round(3)
+def display_table(learned_models):
+    scorers = [result['scorer_name'] for result in learned_models[0]['result']]
+    columns = pd.MultiIndex.from_product([scorers, ['avg', 'std']], names=['Scorer', 'Metric'])
     
-    result_df.set_index('scorer_name', inplace=True)
-    print('\n', learned_model['model'], '\n', learned_model['model_name'], '\n', '-' * 27)
-    display(result_df)
+    model_names = [model['model_name'] for model in learned_models]
+    df = pd.DataFrame(index=model_names, columns=columns)
+
+    for learned_model in learned_models:
+        model_name = learned_model['model_name']
+        for result in learned_model['result']:
+            scorer = result['scorer_name']
+            df.loc[model_name, (scorer, 'avg')] = round(result['avg'], 3)
+            df.loc[model_name, (scorer, 'std')] = round(result['std'], 3)
+
+    display(df)
+            
 
 def plot_tree(columns, y_text, learned_model, title):
     plt.figure(figsize=(12, 8))

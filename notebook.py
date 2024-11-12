@@ -102,10 +102,8 @@ learned_models = ml.learn_models(X_2d, y_2.values, ml.get_svc_kernels_models('_X
                                  test_scorers=ml.get_binary_scorers(), index_test_scorer=0, minimize_test_scorer=False, 
                                  replace=False)
 
-for learned_model in learned_models:
-    visualize.display_table(learned_model)
-    visualize.show_svc_decision_boundary(X_2d, y_2, y_unique_text_2, learned_model['model'], ['b', 'm'], 
-                                         'SVC Decision Boundary ' + learned_model['model_name'])
+visualize.display_table(learned_models)
+visualize.show_svc_decision_boundary(X_2d, y_2, y_unique_text_2, learned_models, ['b', 'm'])
 
 # +
 # SVC_KERNELS_X2_T3
@@ -115,10 +113,9 @@ learned_models = ml.learn_models(X_2d, y_3.values, ml.get_svc_kernels_models('_X
                                  test_scorers=ml.get_multiclass_scorers(), index_test_scorer=0, minimize_test_scorer=False, 
                                  replace=False)
 
-for learned_model in learned_models:
-    visualize.display_table(learned_model)
-    visualize.show_svc_decision_boundary(X_2d, y_3, y_unique_text_3, learned_model['model'], ['b', 'm', 'g'], 
-                                         'SVC Decision Boundary ' + learned_model['model_name'])
+
+visualize.display_table(learned_models)
+visualize.show_svc_decision_boundary(X_2d, y_3, y_unique_text_3, learned_models, ['b', 'm', 'g'])
 # -
 
 # PCA con 3 componenti
@@ -138,10 +135,7 @@ learned_models = ml.learn_models(X_3d, y_2.values, ml.get_svc_kernels_models('_X
                                  test_scorers=ml.get_binary_scorers(), index_test_scorer=0, minimize_test_scorer=False, 
                                  replace=False)
 
-for learned_model in learned_models:
-    visualize.display_table(learned_model)
-    #visualize.show_svc_decision_boundary(X_2d, y_2, y_unique_text_2, learned_model['model'], ['b', 'm'], 
-    #                                     'SVC Decision Boundary ' + learned_model['model_name'])
+visualize.display_table(learned_models)
 
 # +
 # SVC_KERNELS_X3_T3
@@ -151,10 +145,7 @@ learned_models = ml.learn_models(X_3d, y_3.values, ml.get_svc_kernels_models('_X
                                  test_scorers=ml.get_multiclass_scorers(), index_test_scorer=0, minimize_test_scorer=False, 
                                  replace=False)
 
-for learned_model in learned_models:
-    visualize.display_table(learned_model)
-    #visualize.show_svc_decision_boundary_3D(X_3d, y_3, y_unique_text_3, learned_model['model'].named_steps['classifier'], ['b', 'm', 'g'], 
-    #                                        'SVC Decision Boundary ' + learned_model['model_name'])
+visualize.display_table(learned_models)
 # -
 
 pca_min_components = PCA(n_components=min_components)
@@ -169,44 +160,29 @@ learned_models = ml.learn_models(X_min_components, y_2.values, ml.get_svc_kernel
                                  test_scorers=ml.get_binary_scorers(), index_test_scorer=0, minimize_test_scorer=False, 
                                  replace=False)
 
-for learned_model in learned_models:
-    visualize.display_table(learned_model)
+visualize.display_table(learned_models)
+# -
 
-# +
 # SVC_KERNELS_MIN_COMPONENTS_T3
 learned_models = ml.learn_models(X_min_components, y_3.values, ml.get_svc_kernels_models('_MIN_COMPONENTS_T3'),
                                  StratifiedKFold(n_splits=8, shuffle=True, random_state=RANDOM_STATE),
                                  StratifiedKFold(n_splits=7, shuffle=True, random_state=RANDOM_STATE),
                                  test_scorers=ml.get_multiclass_scorers(), index_test_scorer=0, minimize_test_scorer=False, 
                                  replace=False)
-
-for learned_model in learned_models:
-    visualize.display_table(learned_model)
-# -
+visualize.display_table(learned_models)
 
 # K-Means_X_T2, K-Means_X_T3
 visualize.show_cluster_table(2, StandardScaler().fit_transform(X), y_2, y_unique_text_2, 'df_2')
 visualize.show_cluster_table(3, StandardScaler().fit_transform(X), y_3, y_unique_text_3, 'df_3')
 
-# +
 # MODELS_X_T2
 learned_models = ml.learn_models(X.values, y_2.values, ml.MODELS_X_T2,
                                  StratifiedKFold(n_splits=4, shuffle=True, random_state=RANDOM_STATE),
                                  StratifiedKFold(n_splits=3, shuffle=True, random_state=RANDOM_STATE),
                                  test_scorers=ml.get_binary_scorers(), index_test_scorer=0, minimize_test_scorer=False, 
                                  replace=False)
-
+visualize.display_table(learned_models)
 for learned_model in learned_models:
-    visualize.display_table(learned_model)
     if(learned_model['model'].named_steps['classifier'].__class__.__name__ == 'DecisionTreeClassifier'):
         visualize.plot_tree(X.columns, y_unique_text_2, learned_model['model'].named_steps['classifier'], learned_model['model_name'])
-# -
-
-
-
-
-
-
-
-
 
