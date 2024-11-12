@@ -140,12 +140,12 @@ learned_models = ml.learn_models(X_3d, y_2.values, ml.get_svc_kernels_models('_X
 
 for learned_model in learned_models:
     visualize.display_table(learned_model)
-    #visualize.show_svc_decision_boundary_3D(X_3d, y_2, y_unique_text_2, learned_model['model'].named_steps['classifier'], ['b', 'm', 'g'], 
-    #                                        'SVC Decision Boundary ' + learned_model['model_name'])
+    #visualize.show_svc_decision_boundary(X_2d, y_2, y_unique_text_2, learned_model['model'], ['b', 'm'], 
+    #                                     'SVC Decision Boundary ' + learned_model['model_name'])
 
 # +
 # SVC_KERNELS_X3_T3
-learned_models = ml.learn_models(X_3d, y_3.values, ml.get_svc_kernels_models('_X2_T3'),
+learned_models = ml.learn_models(X_3d, y_3.values, ml.get_svc_kernels_models('_X3_T3'),
                                  StratifiedKFold(n_splits=8, shuffle=True, random_state=RANDOM_STATE),
                                  StratifiedKFold(n_splits=7, shuffle=True, random_state=RANDOM_STATE),
                                  test_scorers=ml.get_multiclass_scorers(), index_test_scorer=0, minimize_test_scorer=False, 
@@ -185,8 +185,8 @@ for learned_model in learned_models:
 # -
 
 # K-Means_X_T2, K-Means_X_T3
-visualize.show_cluster_table(2, X, y_2, y_unique_text_2, 'df_2')
-visualize.show_cluster_table(3, X, y_3, y_unique_text_3, 'df_3')
+visualize.show_cluster_table(2, StandardScaler().fit_transform(X), y_2, y_unique_text_2, 'df_2')
+visualize.show_cluster_table(3, StandardScaler().fit_transform(X), y_3, y_unique_text_3, 'df_3')
 
 # +
 # MODELS_X_T2
@@ -198,7 +198,13 @@ learned_models = ml.learn_models(X.values, y_2.values, ml.MODELS_X_T2,
 
 for learned_model in learned_models:
     visualize.display_table(learned_model)
+    if(learned_model['model'].named_steps['classifier'].__class__.__name__ == 'DecisionTreeClassifier'):
+        visualize.plot_tree(X.columns, y_unique_text_2, learned_model['model'].named_steps['classifier'], learned_model['model_name'])
 # -
+
+
+
+
 
 
 
