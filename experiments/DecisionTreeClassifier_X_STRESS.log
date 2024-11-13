@@ -1,1 +1,0 @@
-2024-11-13 16:30:06,013 > [{"scorer_name": "accuracy_score", "avg": 1.0, "std": 0.0}, {"scorer_name": "f1_score", "avg": 1.0, "std": 0.0}, {"scorer_name": "precision_scorer", "avg": 1.0, "std": 0.0}, {"scorer_name": "recall_score", "avg": 1.0, "std": 0.0}, {"scorer_name": "specificity_scorer", "avg": 1.0, "std": 0.0}]

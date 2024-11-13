@@ -1,6 +1,6 @@
 import copy
 import itertools as it
-import joblib
+from joblib import Parallel, delayed
 import json
 import logging
 import numpy as np
@@ -235,7 +235,7 @@ def learn_models(X, y, models, outer_split_method, inner_split_method,
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
     formatter = logging.Formatter('%(asctime)s > %(message)s')
-    
+
     results = []
     for model in models:
         result = None
