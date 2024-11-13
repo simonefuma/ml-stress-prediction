@@ -198,11 +198,23 @@ def learn_parallel(X, y, estimator, param_grid, outer_split_method, inner_split_
                                             )
                                        for hp_conf in make_hp_configurations(param_grid))
         
-        best_inner_conf =  min(inner_results, key=lambda inner_result: inner_result[0] if minimize_val_scorer else -inner_result[0])[1]
-        fit_estimator(X_trainval, y_trainval, estimator, best_inner_conf)
+        best_inner_score =  min(inner_results, key=lambda inner_result: inner_result[0] if minimize_val_scorer else -inner_result[0])[0]
+        bests_inner_results = [inner_result for inner_result in inner_results if inner_result[0] == best_inner_score]
+        
+        best_inner_test_score = np.inf if minimize_test_scorer else -np.inf
+        best_inner_test_conf = None
+        
+        for _, conf in bests_inner_results:
+            fit_estimator(X_trainval, y_trainval, estimator, conf)
+            inner_test_score = get_score(X_test, y_test, estimator, test_scorers[index_test_scorer])
+            if check_best(minimize_test_scorer, inner_test_score, best_inner_test_score):
+                best_inner_test_score, best_inner_test_conf = inner_test_score, conf
+        
+        fit_estimator(X_trainval, y_trainval, estimator, best_inner_test_conf)
         outer_scores.append([get_score(X_test, y_test, estimator, test_scorer) for test_scorer in test_scorers])
+        
         if check_best(minimize_test_scorer, outer_scores[-1][index_test_scorer], best_score):
-            best_score, best_conf = outer_scores[-1][index_test_scorer], best_inner_conf
+            best_score, best_conf = outer_scores[-1][index_test_scorer], best_inner_test_conf
 
     avg = np.mean(outer_scores, axis=0)
     std = np.std(outer_scores, axis=0, ddof=1)
