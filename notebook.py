@@ -19,13 +19,10 @@ for module in [ml, visualize]:
 
 # +
 # TO-DO:
-# topi femmina
 # tutti i topi
 # visualizzare i grafici svc sulle prime due componenti
 # visualizzare iperparametri dei modelli allenati
-# cambiare ordine delle operazioni per matrice di correlazione
-# fattorizzare operazioni
-# cambiare come ottenere models, per modificare iperparametri
+# cambiare come ottenere models, per modificare iperparametri (in knn con il cambiare di X cambia il set di k)
 # -
 
 # # Util
@@ -89,7 +86,9 @@ def show_linear_transform_table(n_components, X):
     return X_pca
 
 
-# # Mouse male
+# # Topi Maschio
+
+# ## Analisi dei dati
 
 df_males = pd.read_csv('data/males.csv', index_col='ID animals', dtype={'sucrose intake': 'float64', 'NOR index': 'float64'})
 df_males
@@ -145,79 +144,6 @@ explained_variance = np.cumsum(pca_males.explained_variance_ratio_)
 minc_x_males = np.argmax(explained_variance > 0.9)+1
 
 visualize.show_cumulative_explained_variance(explained_variance, 'Cumulative Explained Variance X_males')
-# -
-
-# PCA con 2 componenti
-X_males_2c = show_linear_transform_table(2, X_males)
-
-# Plot PCA 2 componenti, 2 e 3 target
-visualize.show_scatter_plot(X_males_2c, y_males_2, y_males_unique_text_2, ['b', 'm'], 'PCA - Scatter Plot (df_males_2)')
-visualize.show_scatter_plot(X_males_2c, y_males_3, y_males_unique_text_3, ['b', 'm', 'g'], 'PCA - Scatter Plot (df_males_3)')
-
-# K-Means
-visualize.show_cluster_plot(2, X_males_2c, y_males_2, y_males_unique_text_2, ['b', 'm'], 'Cluster Plot (df_males_2)')
-visualize.show_cluster_plot(3, X_males_2c, y_males_3, y_males_unique_text_3, ['b', 'm', 'g'], 'Cluster Plot (df_males_3)')
-
-# SVC_KERNELS_X2_MALES_T2
-svc_kernels(X_males_2c, y_males_2.values, y_males_unique_text_2, ['b', 'm'],
-            ml.get_models(ml.SVC_KERNELS, '_X2_MALES_T2'), 
-            ml.get_binary_scorers(), 
-            replace=False)
-
-# SVC_KERNELS_X2_MALES_T3
-svc_kernels(X_males_2c, y_males_3.values, y_males_unique_text_3, ['b', 'm', 'g'],
-            ml.get_models(ml.SVC_KERNELS, '_X2_MALES_T3'), 
-            ml.get_multiclass_scorers(), 
-            replace=False)
-
-# PCA con 3 componenti
-X_males_3c = show_linear_transform_table(3, X_males)
-
-# Scatter Plot 3D dei dati trasformati da PCA con 3 componenti
-visualize.show_3D_scatter_plot(X_males_3c, y_males_2, y_males_unique_text_2, ['b', 'm'], 'Scatter Plot (df_males_2)')
-visualize.show_3D_scatter_plot(X_males_3c, y_males_3, y_males_unique_text_3, ['b', 'm', 'g'], 'Scatter Plot (df_males_3)')
-
-# SVC_KERNELS_X3_MALES_T2
-svc_kernels(X_males_3c, y_males_2.values, y_males_unique_text_2, ['b', 'm'],
-            ml.get_models(ml.SVC_KERNELS, '_X3_MALES_T2'), 
-            ml.get_binary_scorers(), 
-            replace=False)
-
-# SVC_KERNELS_X3_MALES_T3
-svc_kernels(X_males_3c, y_males_3.values, y_males_unique_text_3, ['b', 'm', 'g'],
-            ml.get_models(ml.SVC_KERNELS, '_X3_MALES_T3'), 
-            ml.get_multiclass_scorers(), 
-            replace=False)
-
-# PCA con min_components_x_males
-X_males_minc = show_linear_transform_table(minc_x_males, X_males)
-
-# SVC_KERNELS_MINC_MALES_T2
-svc_kernels(X_males_minc, y_males_2.values, y_males_unique_text_2, ['b', 'm'],
-            ml.get_models(ml.SVC_KERNELS, '_MINC_MALES_T2'), 
-            ml.get_binary_scorers(), 
-            replace=False)
-
-# SVC_KERNELS_MINC_MALES_T3
-svc_kernels(X_males_minc, y_males_3.values, y_males_unique_text_3, ['b', 'm', 'g'],
-            ml.get_models(ml.SVC_KERNELS, '_MINC_MALES_T3'), 
-            ml.get_multiclass_scorers(), 
-            replace=False)
-
-# K-Means_X_MALES_T2, K-Means_X_MALES_T3
-visualize.show_cluster_table(2, StandardScaler().fit_transform(X_males), y_males_2, y_males_unique_text_2, 'df_males_2')
-visualize.show_cluster_table(3, StandardScaler().fit_transform(X_males), y_males_3, y_males_unique_text_3, 'df_males_3')
-
-# MODELS_X_MALES_T2
-models(X_males, y_males_2.values, y_males_unique_text_2, 
-       ml.get_models(ml.MODELS, '_X_MALES_T2'), 
-       ml.get_binary_scorers(), 
-       replace=False)
-# MODELS_X_MALES_T3
-models(X_males, y_males_3.values, y_males_unique_text_3, 
-       ml.get_models(ml.MODELS, '_X_MALES_T3'), 
-       ml.get_multiclass_scorers(), 
-       replace=False)
 
 # +
 # PCA_X_MALES_STRESS
@@ -229,6 +155,67 @@ minc_x_males_stress = np.argmax(explained_variance > 0.9)+1
 
 visualize.show_cumulative_explained_variance(explained_variance, 'Cumulative Explained Variance X_MALES_STRESS')
 # -
+
+# ## Studio dei modelli
+
+# ### Target Binario (no stress/stress)
+
+# #### PCA 2 Componenti
+
+# PCA con 2 componenti
+X_males_2c = show_linear_transform_table(2, X_males)
+
+# Scatter Plot
+visualize.show_scatter_plot(X_males_2c, y_males_2, y_males_unique_text_2, ['b', 'm'], 'PCA - Scatter Plot (df_males_2)')
+
+# K-Means
+visualize.show_cluster_plot(2, X_males_2c, y_males_2, y_males_unique_text_2, ['b', 'm'], 'Cluster Plot (df_males_2)')
+
+# SVC_KERNELS_X2_MALES_T2
+svc_kernels(X_males_2c, y_males_2.values, y_males_unique_text_2, ['b', 'm'],
+            ml.get_models(ml.SVC_KERNELS, '_X2_MALES_T2'), 
+            ml.get_binary_scorers(), 
+            replace=False)
+
+# #### PCA 3 Componenti
+
+# PCA con 3 componenti
+X_males_3c = show_linear_transform_table(3, X_males)
+
+# Scatter Plot 3D
+visualize.show_3D_scatter_plot(X_males_3c, y_males_2, y_males_unique_text_2, ['b', 'm'], 'Scatter Plot (df_males_2)')
+
+# SVC_KERNELS_X3_MALES_T2
+svc_kernels(X_males_3c, y_males_2.values, y_males_unique_text_2, ['b', 'm'],
+            ml.get_models(ml.SVC_KERNELS, '_X3_MALES_T2'), 
+            ml.get_binary_scorers(), 
+            replace=False)
+
+# #### Varianza cumulativa >= 0.9
+
+# PCA con min_components_x_males
+X_males_minc = show_linear_transform_table(minc_x_males, X_males)
+
+# SVC_KERNELS_MINC_MALES_T2
+svc_kernels(X_males_minc, y_males_2.values, y_males_unique_text_2, ['b', 'm'],
+            ml.get_models(ml.SVC_KERNELS, '_MINC_MALES_T2'), 
+            ml.get_binary_scorers(), 
+            replace=False)
+
+# #### Senza PCA
+
+# K-Means_X_MALES_T2
+visualize.show_cluster_table(2, StandardScaler().fit_transform(X_males), y_males_2, y_males_unique_text_2, 'df_males_2')
+
+# MODELS_X_MALES_T2
+models(X_males, y_males_2.values, y_males_unique_text_2, 
+       ml.get_models(ml.MODELS, '_X_MALES_T2'), 
+       ml.get_binary_scorers(), 
+       replace=False)
+
+# ### Target Binario (stress vulnerabile/stress resiliente)
+
+# #### PCA 2 Componenti
 
 # PCA con due componenti
 X_males_stress_2c = show_linear_transform_table(2, X_males_stress)
@@ -245,10 +232,12 @@ svc_kernels(X_males_stress_2c, y_males_stress.values, y_males_unique_text_stress
             ml.get_binary_scorers(), 
             replace=False)
 
+# #### PCA 3 Componenti
+
 # PCA con 3 componenti
 X_males_stress_3c = show_linear_transform_table(3, X_males_stress)
 
-# Scatter Plot 3D dei dati trasformati da PCA con 3 componenti
+# Scatter Plot 3D
 visualize.show_3D_scatter_plot(X_males_stress_3c, y_males_stress, y_males_unique_text_stress, ['b', 'm'], 'Scatter Plot (df_males_stress)')
 
 # SVC_KERNELS_X3_MALES_STRESS
@@ -256,6 +245,8 @@ svc_kernels(X_males_stress_3c, y_males_stress.values, y_males_unique_text_stress
             ml.get_models(ml.SVC_KERNELS, '_X3_MALES_STRESS'), 
             ml.get_binary_scorers(), 
             replace=False)
+
+# #### Varianza cumulativa >= 0.9
 
 # PCA con minc_x_males_stress
 X_males_stress_minc = show_linear_transform_table(minc_x_males_stress, X_males_stress)
@@ -266,6 +257,8 @@ svc_kernels(X_males_stress_minc, y_males_stress.values, y_males_unique_text_stre
             ml.get_binary_scorers(), 
             replace=False)
 
+# #### Senza PCA
+
 # K-Means_X_MALES_STRESS
 visualize.show_cluster_table(2, StandardScaler().fit_transform(X_males_stress), y_males_stress, y_males_unique_text_stress, 'df_males_stress')
 
@@ -275,7 +268,64 @@ models(X_males_stress, y_males_stress.values, y_males_unique_text_stress,
        ml.get_binary_scorers(), 
        replace=False)
 
+# ### Target Multiclasse (no stress/stress vulnerabile/stress resiliente)
+
+# #### PCA 2 Componenti
+
+# PCA con 2 componenti
+X_males_2c = show_linear_transform_table(2, X_males)
+
+# Scatter Plot
+visualize.show_scatter_plot(X_males_2c, y_males_3, y_males_unique_text_3, ['b', 'm', 'g'], 'PCA - Scatter Plot (df_males_3)')
+
+# K-Means
+visualize.show_cluster_plot(3, X_males_2c, y_males_3, y_males_unique_text_3, ['b', 'm', 'g'], 'Cluster Plot (df_males_3)')
+
+# SVC_KERNELS_X2_MALES_T3
+svc_kernels(X_males_2c, y_males_3.values, y_males_unique_text_3, ['b', 'm', 'g'],
+            ml.get_models(ml.SVC_KERNELS, '_X2_MALES_T3'), 
+            ml.get_multiclass_scorers(), 
+            replace=False)
+
+# #### PCA 3 Componenti
+
+# PCA con 3 componenti
+X_males_3c = show_linear_transform_table(3, X_males)
+
+# Scatter Plot 3D
+visualize.show_3D_scatter_plot(X_males_3c, y_males_3, y_males_unique_text_3, ['b', 'm', 'g'], 'Scatter Plot (df_males_3)')
+
+# SVC_KERNELS_X3_MALES_T3
+svc_kernels(X_males_3c, y_males_3.values, y_males_unique_text_3, ['b', 'm', 'g'],
+            ml.get_models(ml.SVC_KERNELS, '_X3_MALES_T3'), 
+            ml.get_multiclass_scorers(), 
+            replace=False)
+
+# #### Varianza cumulativa >= 0.9
+
+# PCA con min_components_x_males
+X_males_minc = show_linear_transform_table(minc_x_males, X_males)
+
+# SVC_KERNELS_MINC_MALES_T3
+svc_kernels(X_males_minc, y_males_3.values, y_males_unique_text_3, ['b', 'm', 'g'],
+            ml.get_models(ml.SVC_KERNELS, '_MINC_MALES_T3'), 
+            ml.get_multiclass_scorers(), 
+            replace=False)
+
+# #### Senza PCA
+
+# K-Means_X_MALES_T3
+visualize.show_cluster_table(3, StandardScaler().fit_transform(X_males), y_males_3, y_males_unique_text_3, 'df_males_3')
+
+# MODELS_X_MALES_T3
+models(X_males, y_males_3.values, y_males_unique_text_3, 
+       ml.get_models(ml.MODELS, '_X_MALES_T3'), 
+       ml.get_multiclass_scorers(), 
+       replace=False)
+
 # # Mouse female
+
+# ## Analisi dei dati
 
 df_females = pd.read_csv('data/females.csv', index_col='ID animals', dtype={'NOR index': 'float64', '% OP': 'float64', 't%OP': 'float64'})
 df_females
@@ -331,80 +381,6 @@ explained_variance = np.cumsum(pca_females.explained_variance_ratio_)
 minc_x_females = np.argmax(explained_variance > 0.9)+1
 
 visualize.show_cumulative_explained_variance(explained_variance, 'Cumulative Explained Variance X_females')
-# -
-
-# PCA con 2 componenti
-X_females_2c = show_linear_transform_table(2, X_females)
-
-# Plot PCA 2 componenti, 2 e 3 target
-visualize.show_scatter_plot(X_females_2c, y_females_2, y_females_unique_text_2, ['b', 'm'], 'PCA - Scatter Plot (df_females_2)')
-visualize.show_scatter_plot(X_females_2c, y_females_3, y_females_unique_text_3, ['b', 'm', 'g'], 'PCA - Scatter Plot (df_females_3)')
-
-# K-Means
-visualize.show_cluster_plot(2, X_females_2c, y_females_2, y_females_unique_text_2, ['b', 'm'], 'Cluster Plot (df_females_2)')
-visualize.show_cluster_plot(3, X_females_2c, y_females_3, y_females_unique_text_3, ['b', 'm', 'g'], 'Cluster Plot (df_females_3)')
-
-# SVC_KERNELS_X2_FEMALES_T2
-svc_kernels(X_females_2c, y_females_2.values, y_females_unique_text_2, ['b', 'm'],
-            ml.get_models(ml.SVC_KERNELS, '_X2_FEMALES_T2'), 
-            ml.get_binary_scorers(), 
-            replace=False)
-
-# SVC_KERNELS_X2_FEMALES_T3
-svc_kernels(X_females_2c, y_females_3.values, y_females_unique_text_3, ['b', 'm', 'g'],
-            ml.get_models(ml.SVC_KERNELS, '_X2_FEMALES_T3'), 
-            ml.get_multiclass_scorers(), 
-            replace=False)
-
-# PCA con 3 componenti
-X_females_3c = show_linear_transform_table(3, X_females)
-
-# Scatter Plot 3D dei dati trasformati da PCA con 3 componenti
-visualize.show_3D_scatter_plot(X_females_3c, y_females_2, y_females_unique_text_2, ['b', 'm'], 'Scatter Plot (df_females_2)')
-visualize.show_3D_scatter_plot(X_females_3c, y_females_3, y_females_unique_text_3, ['b', 'm', 'g'], 'Scatter Plot (df_females_3)')
-
-# SVC_KERNELS_X3_FEMALES_T2
-svc_kernels(X_females_3c, y_females_2.values, y_females_unique_text_2, ['b', 'm'],
-            ml.get_models(ml.SVC_KERNELS, '_X3_FEMALES_T2'), 
-            ml.get_binary_scorers(), 
-            replace=False)
-
-# SVC_KERNELS_X3_FEMALES_T3
-svc_kernels(X_females_3c, y_females_3.values, y_females_unique_text_3, ['b', 'm', 'g'],
-            ml.get_models(ml.SVC_KERNELS, '_X3_FEMALES_T3'), 
-            ml.get_multiclass_scorers(), 
-            replace=False)
-
-# PCA con min_components_x_females
-X_females_minc = show_linear_transform_table(minc_x_females, X_females)
-
-# SVC_KERNELS_MINC_FEMALES_T2
-svc_kernels(X_females_minc, y_females_2.values, y_females_unique_text_2, ['b', 'm'],
-            ml.get_models(ml.SVC_KERNELS, '_MINC_FEMALES_T2'), 
-            ml.get_binary_scorers(), 
-            replace=False)
-
-# SVC_KERNELS_MINC_FEMALES_T3
-svc_kernels(X_females_minc, y_females_3.values, y_females_unique_text_3, ['b', 'm', 'g'],
-            ml.get_models(ml.SVC_KERNELS, '_MINC_FEMALES_T3'), 
-            ml.get_multiclass_scorers(), 
-            replace=False)
-
-# K-Means_X_FEMALES_T2, K-Means_X_FEMALES_T3
-visualize.show_cluster_table(2, StandardScaler().fit_transform(X_females), y_females_2, y_females_unique_text_2, 'df_females_2')
-visualize.show_cluster_table(3, StandardScaler().fit_transform(X_females), y_females_3, y_females_unique_text_3, 'df_females_3')
-
-# MODELS_X_FEMALES_T2
-models(X_females, y_females_2.values, y_females_unique_text_2, 
-       ml.get_models(ml.MODELS, '_X_FEMALES_T2'), 
-       ml.get_binary_scorers(), 
-       replace=False)
-
-# MODELS_X_FEMALES_T3
-models(X_females, y_females_3.values, y_females_unique_text_3, 
-       ml.get_models(ml.MODELS, '_X_FEMALES_T3'), 
-       ml.get_multiclass_scorers(), 
-       replace=False)
 
 # +
 # PCA_X_FEMALES_STRESS
@@ -417,10 +393,71 @@ minc_x_females_stress = np.argmax(explained_variance > 0.9)+1
 visualize.show_cumulative_explained_variance(explained_variance, 'Cumulative Explained Variance X_FEMALES_STRESS')
 # -
 
+# ## Studio dei modelli
+
+# ### Target Binario (no stress/stress)
+
+# #### PCA 2 Componenti
+
+# PCA con 2 componenti
+X_females_2c = show_linear_transform_table(2, X_females)
+
+# Scatter Plot
+visualize.show_scatter_plot(X_females_2c, y_females_2, y_females_unique_text_2, ['b', 'm'], 'PCA - Scatter Plot (df_females_2)')
+
+# K-Means
+visualize.show_cluster_plot(2, X_females_2c, y_females_2, y_females_unique_text_2, ['b', 'm'], 'Cluster Plot (df_females_2)')
+
+# SVC_KERNELS_X2_FEMALES_T2
+svc_kernels(X_females_2c, y_females_2.values, y_females_unique_text_2, ['b', 'm'],
+            ml.get_models(ml.SVC_KERNELS, '_X2_FEMALES_T2'), 
+            ml.get_binary_scorers(), 
+            replace=False)
+
+# #### PCA 3 Componenti
+
+# PCA con 3 componenti
+X_females_3c = show_linear_transform_table(3, X_females)
+
+# Scatter Plot 3D
+visualize.show_3D_scatter_plot(X_females_3c, y_females_2, y_females_unique_text_2, ['b', 'm'], 'Scatter Plot (df_females_2)')
+
+# SVC_KERNELS_X3_FEMALES_T2
+svc_kernels(X_females_3c, y_females_2.values, y_females_unique_text_2, ['b', 'm'],
+            ml.get_models(ml.SVC_KERNELS, '_X3_FEMALES_T2'), 
+            ml.get_binary_scorers(), 
+            replace=False)
+
+# #### Varianza cumulativa >= 0.9
+
+# PCA con min_components_x_females
+X_females_minc = show_linear_transform_table(minc_x_females, X_females)
+
+# SVC_KERNELS_MINC_FEMALES_T2
+svc_kernels(X_females_minc, y_females_2.values, y_females_unique_text_2, ['b', 'm'],
+            ml.get_models(ml.SVC_KERNELS, '_MINC_FEMALES_T2'), 
+            ml.get_binary_scorers(), 
+            replace=False)
+
+# #### Senza PCA
+
+# K-Means_X_FEMALES_T2
+visualize.show_cluster_table(2, StandardScaler().fit_transform(X_females), y_females_2, y_females_unique_text_2, 'df_females_2')
+
+# MODELS_X_FEMALES_T2
+models(X_females, y_females_2.values, y_females_unique_text_2, 
+       ml.get_models(ml.MODELS, '_X_FEMALES_T2'), 
+       ml.get_binary_scorers(), 
+       replace=False)
+
+# ### Target Binario (stress vulnerabile/stress resiliente)
+
+# #### PCA 2 Componenti
+
 # PCA con due componenti
 X_females_stress_2c = show_linear_transform_table(2, X_females_stress)
 
-# Plot PCA 2 componenti
+# Scatter Plot
 visualize.show_scatter_plot(X_females_stress_2c, y_females_stress, y_females_unique_text_stress, ['b', 'm'], 'PCA - Scatter Plot (df_females_stress)')
 
 # K-Means
@@ -431,6 +468,8 @@ svc_kernels(X_females_stress_2c, y_females_stress.values, y_females_unique_text_
             ml.get_models(ml.SVC_KERNELS, '_X2_FEMALES_STRESS'), 
             ml.get_binary_scorers(), 
             replace=False)
+
+# #### PCA 3 Componenti
 
 # PCA con 3 componenti
 X_females_stress_3c = show_linear_transform_table(3, X_females_stress)
@@ -444,6 +483,8 @@ svc_kernels(X_females_stress_3c, y_females_stress.values, y_females_unique_text_
             ml.get_binary_scorers(), 
             replace=False)
 
+# #### Varianza cumulativa >= 0.9
+
 # PCA con minc_x_females_stress
 X_females_stress_minc = show_linear_transform_table(minc_x_females_stress, X_females_stress)
 
@@ -453,6 +494,8 @@ svc_kernels(X_females_stress_minc, y_females_stress.values, y_females_unique_tex
             ml.get_binary_scorers(), 
             replace=False)
 
+# #### Senza PCA
+
 # K-Means_X_FEMALES_STRESS
 visualize.show_cluster_table(2, StandardScaler().fit_transform(X_females_stress), y_females_stress, y_females_unique_text_stress, 'df_females_stress')
 
@@ -460,6 +503,61 @@ visualize.show_cluster_table(2, StandardScaler().fit_transform(X_females_stress)
 models(X_females_stress, y_females_stress.values, y_females_unique_text_stress, 
        ml.get_models(ml.MODELS, '_X_FEMALES_STRESS'), 
        ml.get_binary_scorers(), 
+       replace=False)
+
+# ### Target Multiclasse (no stress/stress vulnerabile/stress resiliente)
+
+# #### PCA 2 Componenti
+
+# PCA con 2 componenti
+X_females_2c = show_linear_transform_table(2, X_females)
+
+# Scatter Plot
+visualize.show_scatter_plot(X_females_2c, y_females_3, y_females_unique_text_3, ['b', 'm', 'g'], 'PCA - Scatter Plot (df_females_3)')
+
+# K-Means
+visualize.show_cluster_plot(3, X_females_2c, y_females_3, y_females_unique_text_3, ['b', 'm', 'g'], 'Cluster Plot (df_females_3)')
+
+# SVC_KERNELS_X2_FEMALES_T3
+svc_kernels(X_females_2c, y_females_3.values, y_females_unique_text_3, ['b', 'm', 'g'],
+            ml.get_models(ml.SVC_KERNELS, '_X2_FEMALES_T3'), 
+            ml.get_multiclass_scorers(), 
+            replace=False)
+
+# #### PCA 3 Componenti
+
+# PCA con 3 componenti
+X_females_3c = show_linear_transform_table(3, X_females)
+
+# Scatter Plot 3D
+visualize.show_3D_scatter_plot(X_females_3c, y_females_3, y_females_unique_text_3, ['b', 'm', 'g'], 'Scatter Plot (df_females_3)')
+
+# SVC_KERNELS_X3_FEMALES_T3
+svc_kernels(X_females_3c, y_females_3.values, y_females_unique_text_3, ['b', 'm', 'g'],
+            ml.get_models(ml.SVC_KERNELS, '_X3_FEMALES_T3'), 
+            ml.get_multiclass_scorers(), 
+            replace=False)
+
+# #### Varianza cumulativa >= 0.9
+
+# PCA con min_components_x_females
+X_females_minc = show_linear_transform_table(minc_x_females, X_females)
+
+# SVC_KERNELS_MINC_FEMALES_T3
+svc_kernels(X_females_minc, y_females_3.values, y_females_unique_text_3, ['b', 'm', 'g'],
+            ml.get_models(ml.SVC_KERNELS, '_MINC_FEMALES_T3'), 
+            ml.get_multiclass_scorers(), 
+            replace=False)
+
+# #### Senza PCA
+
+# K-Means_X_FEMALES_T3
+visualize.show_cluster_table(3, StandardScaler().fit_transform(X_females), y_females_3, y_females_unique_text_3, 'df_females_3')
+
+# MODELS_X_FEMALES_T3
+models(X_females, y_females_3.values, y_females_unique_text_3, 
+       ml.get_models(ml.MODELS, '_X_FEMALES_T3'), 
+       ml.get_multiclass_scorers(), 
        replace=False)
 
 
