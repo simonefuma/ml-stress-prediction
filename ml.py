@@ -49,19 +49,19 @@ SVC_KERNELS = [
     }
 ]
 
-MODELS_X_T2 = [
+MODELS = [
     {
         'model': KNeighborsClassifier(),
-        'name': 'KNeighborsClassifier_X_T2',
+        'name': 'KNeighborsClassifier',
         'param_grid': 
         {
-            'n_neighbors': [1, 3, 5, 7, 9, 11],
+            'n_neighbors': [1, 3, 5, 7],
             'metric': ['cityblock', 'cosine', 'euclidean', 'l2', 'l1', 'manhattan', 'nan_euclidean']
         }
     },
     {
         'model': SVC(),
-        'name': 'SVC_X_T2',
+        'name': 'SVC',
         'param_grid':
         {
             'C': [0.01, 0.1, 1, 10, 100],
@@ -72,7 +72,7 @@ MODELS_X_T2 = [
     },
     {
         'model': DecisionTreeClassifier(random_state=RANDOM_STATE),
-        'name': 'DecisionTreeClassifier_X_T2',
+        'name': 'DecisionTreeClassifier',
         'param_grid':
         {
             'criterion': ['gini', 'entropy', 'log_loss'],
@@ -84,7 +84,7 @@ MODELS_X_T2 = [
     },
     {
         'model': RandomForestClassifier(bootstrap=False, random_state=RANDOM_STATE),
-        'name': 'RandomForestClassifier_X_T2',
+        'name': 'RandomForestClassifier',
         'param_grid':
         {
             'n_estimators': [3, 5, 7],
@@ -100,10 +100,13 @@ def get_binary_scorers():
     specificity_scorer = lambda y_true, y_pred: metrics.recall_score(y_true, y_pred, pos_label=0)
     specificity_scorer.__name__ = 'specificity_scorer'
 
+    precision_scorer = lambda y_true, y_pred: metrics.precision_score(y_true, y_pred, zero_division=1)
+    precision_scorer.__name__ = 'precision_scorer'
+    
     return [
         metrics.accuracy_score, 
         metrics.f1_score, 
-        metrics.precision_score, 
+        precision_scorer, 
         metrics.recall_score, 
         specificity_scorer
     ]
@@ -122,12 +125,11 @@ def get_multiclass_scorers():
     multiclass_scorers.append(specificity_score)
     return multiclass_scorers
 
-
-def get_svc_kernels_models(postfix):
-    return [{'model': svc_kernel['model'], 
-             'name': svc_kernel['name']+postfix, 
-             'param_grid': svc_kernel['param_grid']} 
-            for svc_kernel in SVC_KERNELS]
+def get_models(models, postfix):
+    return [{'model': model['model'], 
+             'name': model['name']+postfix, 
+             'param_grid': model['param_grid']} 
+            for model in models]
     
 
 def np_jsonify(data):

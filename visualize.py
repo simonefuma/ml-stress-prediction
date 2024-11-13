@@ -35,6 +35,18 @@ def show_correlation_matrix(df, title):
     plt.show()
 
 
+def show_cumulative_explained_variance(explained_variance, title):
+    plt.figure(figsize=(8, 5))
+    plt.plot(range(1, len(explained_variance) + 1), explained_variance, marker='o')
+    plt.xticks(range(1, len(explained_variance) + 1))
+    plt.axhline(y=0.9, color='r', linestyle='--')
+    plt.title(title)
+    plt.xlabel('Number of Components')
+    plt.ylabel('Cumulative Explained Variance')
+    plt.grid()
+    plt.show()
+
+
 def show_scatter_plot(X, y, y_text, colors, title):
     plt.figure(figsize=(8, 6))
     
@@ -164,7 +176,7 @@ def display_table(learned_models):
             
 
 def plot_tree(columns, y_text, learned_model, title):
-    plt.figure(figsize=(12, 8))
+    plt.figure(figsize=(12, 12))
     sklearn_plot_tree(learned_model, feature_names=columns, class_names=y_text, filled=True)
     plt.title(title)
     plt.show()
