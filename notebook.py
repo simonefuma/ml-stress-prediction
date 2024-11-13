@@ -28,6 +28,28 @@ for module in [ml, visualize]:
 # cambiare come ottenere models, per modificare iperparametri
 # -
 
+# # Util
+
+def get_dataframes(df):
+    df_2 = copy.copy(df)
+    y_unique_text_2 = df_2['target'].str.split(' - ').str[0].unique()
+    df_2['target'] = pd.factorize(df_2['target'].str.split(' - ').str[0])[0]
+    y_2 = df_2['target']
+    
+    df_3 = copy.copy(df)
+    y_unique_text_3 = df_3['target'].unique()
+    df_3['target'] = pd.factorize(df_3['target'])[0]
+    y_3 = df_3['target']
+    
+    df_stress = copy.copy(df)
+    df_stress = df_stress[df_stress['target'] != 'no stress']
+    y_unique_text_stress = df_stress['target'].unique()
+    df_stress['target'] = pd.factorize(df_stress['target'])[0]
+    y_stress = df_stress['target']
+
+    return ((df_2, y_2, y_unique_text_2), (df_3, y_3, y_unique_text_3), (df_stress, y_stress, y_unique_text_stress))
+
+
 def svc_kernels(X, y, y_unique_text, colors, models, test_scorers,
                 outer_split=8, inner_split=7, 
                 index_test_scorer=0, minimize_test_scorer=False, 
@@ -60,6 +82,13 @@ def models(X, y, y_unique_text, models, test_scorers,
             visualize.plot_tree(X.columns, y_unique_text, learned_model['model'].named_steps['classifier'], learned_model['model_name'])
 
 
+def show_linear_transform_table(n_components, X):
+    pca = PCA(n_components=n_components)
+    X_pca = pca.fit_transform(StandardScaler().fit_transform(X))
+    display(pd.DataFrame(pca.components_, columns=X.columns, index=[f'Cmp {i+1}' for i in range(pca.n_components_)]))
+    return X_pca
+
+
 # # Mouse male
 
 df_males = pd.read_csv('data/males.csv', index_col='ID animals', dtype={'sucrose intake': 'float64', 'NOR index': 'float64'})
@@ -87,40 +116,25 @@ plt.boxplot(df_males.drop(columns=['target']).values, tick_labels=df_males.drop(
 
 plt.title('Boxplot per ogni attributo')
 plt.show()
+# -
 
-# +
+# Matrice di correlazione
+((df_males_2, y_males_2, y_males_unique_text_2), (df_males_3, y_males_3, y_males_unique_text_3), (df_males_stress, y_males_stress, y_males_unique_text_stress)) = get_dataframes(df_males)
+X_males = df_males.drop(columns=['target'])
+X_males_stress = df_males_stress.drop(columns=['target'])
+visualize.show_correlation_matrix(df_males_2, 'Matrice di Correlazione (df_males_2)')
+visualize.show_correlation_matrix(df_males_3, 'Matrice di Correlazione (df_males_3)')
+visualize.show_correlation_matrix(df_males_stress, 'Matrice di Correlazione (df_males_stress)')
+
 # # %OP = OP/(OP+CL)*100
 # t%OP = tOP/(tOP+tCL+tCENT)*100
 # tCENT = (300-tOP-tCL)
 try:
-    df_males = df_males.drop(columns=['tOP', 'tCL', 'tCENT'])
+    df_males_2 = df_males_2.drop(columns=['tOP', 'tCL', 'tCENT'])
+    df_males_3 = df_males_3.drop(columns=['tOP', 'tCL', 'tCENT'])
+    df_males_stress = df_males_stress.drop(columns=['tOP', 'tCL', 'tCENT'])
 except:
     pass
-    
-X_males = df_males.drop(columns=['target'])
-
-df_males_2 = copy.copy(df_males)
-y_males_unique_text_2 = df_males_2['target'].str.split(' - ').str[0].unique()
-df_males_2['target'] = pd.factorize(df_males_2['target'].str.split(' - ').str[0])[0]
-y_males_2 = df_males_2['target']
-
-df_males_3 = copy.copy(df_males)
-y_males_unique_text_3 = df_males_3['target'].unique()
-df_males_3['target'] = pd.factorize(df_males_3['target'])[0]
-y_males_3 = df_males_3['target']
-
-df_males_stress = copy.copy(df_males)
-df_males_stress = df_males_stress[df_males_stress['target'] != 'no stress']
-X_males_stress = df_males_stress.drop(columns=['target'])
-y_males_unique_text_stress = df_males_stress['target'].unique()
-df_males_stress['target'] = pd.factorize(df_males_stress['target'])[0]
-y_males_stress = df_males_stress['target']
-# -
-
-# Matrice di correlazione
-visualize.show_correlation_matrix(df_males_2, 'Matrice di Correlazione (df_males_2)')
-visualize.show_correlation_matrix(df_males_3, 'Matrice di Correlazione (df_males_3)')
-visualize.show_correlation_matrix(df_males_stress, 'Matrice di Correlazione (df_males_stress)')
 
 # +
 # PCA_X_MALES
@@ -134,9 +148,7 @@ visualize.show_cumulative_explained_variance(explained_variance, 'Cumulative Exp
 # -
 
 # PCA con 2 componenti
-pca_males_2c = PCA(n_components=2)
-X_males_2c = pca_males_2c.fit_transform(StandardScaler().fit_transform(X_males))
-pd.DataFrame(pca_males_2c.components_, columns=X_males.columns, index=[f'Cmp {i+1}' for i in range(pca_males_2c.n_components_)])
+X_males_2c = show_linear_transform_table(2, X_males)
 
 # Plot PCA 2 componenti, 2 e 3 target
 visualize.show_scatter_plot(X_males_2c, y_males_2, y_males_unique_text_2, ['b', 'm'], 'PCA - Scatter Plot (df_males_2)')
@@ -159,9 +171,7 @@ svc_kernels(X_males_2c, y_males_3.values, y_males_unique_text_3, ['b', 'm', 'g']
             replace=False)
 
 # PCA con 3 componenti
-pca_males_3c = PCA(n_components=3)
-X_males_3c = pca_males_3c.fit_transform(StandardScaler().fit_transform(X_males))
-pd.DataFrame(pca_males_3c.components_, columns=X_males.columns, index=[f'Cmp {i+1}' for i in range(pca_males_3c.n_components_)])
+X_males_3c = show_linear_transform_table(3, X_males)
 
 # Scatter Plot 3D dei dati trasformati da PCA con 3 componenti
 visualize.show_3D_scatter_plot(X_males_3c, y_males_2, y_males_unique_text_2, ['b', 'm'], 'Scatter Plot (df_males_2)')
@@ -180,9 +190,7 @@ svc_kernels(X_males_3c, y_males_3.values, y_males_unique_text_3, ['b', 'm', 'g']
             replace=False)
 
 # PCA con min_components_x_males
-pca_males_minc = PCA(n_components=minc_x_males)
-X_males_minc = pca_males_minc.fit_transform(StandardScaler().fit_transform(X_males))
-pd.DataFrame(pca_males_minc.components_, columns=X_males.columns, index=[f'Cmp {i+1}' for i in range(pca_males_minc.n_components_)])
+X_males_minc = show_linear_transform_table(minc_x_males, X_males)
 
 # SVC_KERNELS_MINC_MALES_T2
 svc_kernels(X_males_minc, y_males_2.values, y_males_unique_text_2, ['b', 'm'],
@@ -223,9 +231,7 @@ visualize.show_cumulative_explained_variance(explained_variance, 'Cumulative Exp
 # -
 
 # PCA con due componenti
-pca_males_stress_2c = PCA(n_components=2)
-X_males_stress_2c = pca_males_stress_2c.fit_transform(StandardScaler().fit_transform(X_males_stress))
-pd.DataFrame(pca_males_stress_2c.components_, columns=X_males_stress.columns, index=[f'Cmp {i+1}' for i in range(pca_males_stress_2c.n_components_)])
+X_males_stress_2c = show_linear_transform_table(2, X_males_stress)
 
 # Plot PCA 2 componenti
 visualize.show_scatter_plot(X_males_stress_2c, y_males_stress, y_males_unique_text_stress, ['b', 'm'], 'PCA - Scatter Plot (df_males_stress)')
@@ -240,9 +246,7 @@ svc_kernels(X_males_stress_2c, y_males_stress.values, y_males_unique_text_stress
             replace=False)
 
 # PCA con 3 componenti
-pca_males_stress_3c = PCA(n_components=3)
-X_males_stress_3c = pca_males_stress_3c.fit_transform(StandardScaler().fit_transform(X_males_stress))
-pd.DataFrame(pca_males_stress_3c.components_, columns=X_males_stress.columns, index=[f'Cmp {i+1}' for i in range(pca_males_stress_3c.n_components_)])
+X_males_stress_3c = show_linear_transform_table(3, X_males_stress)
 
 # Scatter Plot 3D dei dati trasformati da PCA con 3 componenti
 visualize.show_3D_scatter_plot(X_males_stress_3c, y_males_stress, y_males_unique_text_stress, ['b', 'm'], 'Scatter Plot (df_males_stress)')
@@ -254,9 +258,7 @@ svc_kernels(X_males_stress_3c, y_males_stress.values, y_males_unique_text_stress
             replace=False)
 
 # PCA con minc_x_males_stress
-pca_males_stress_minc = PCA(n_components=minc_x_males_stress)
-X_males_stress_minc = pca_males_stress_minc.fit_transform(StandardScaler().fit_transform(X_males_stress))
-pd.DataFrame(pca_males_stress_minc.components_, columns=X_males_stress.columns, index=[f'Cmp {i+1}' for i in range(pca_males_stress_minc.n_components_)])
+X_males_stress_minc = show_linear_transform_table(minc_x_males_stress, X_males_stress)
 
 # SVC_KERNELS_MINC_MALES_STRESS
 svc_kernels(X_males_stress_minc, y_males_stress.values, y_males_unique_text_stress, ['b', 'm'],
@@ -300,40 +302,25 @@ plt.boxplot(df_females.drop(columns=['target']).values, tick_labels=df_females.d
 
 plt.title('Boxplot per ogni attributo')
 plt.show()
+# -
 
-# +
+# Matrice di correlazione
+((df_females_2, y_females_2, y_females_unique_text_2), (df_females_3, y_females_3, y_females_unique_text_3), (df_females_stress, y_females_stress, y_females_unique_text_stress)) = get_dataframes(df_females)
+X_females = df_females.drop(columns=['target'])
+X_females_stress = df_females_stress.drop(columns=['target'])
+visualize.show_correlation_matrix(df_females_2, 'Matrice di Correlazione (df_females_2)')
+visualize.show_correlation_matrix(df_females_3, 'Matrice di Correlazione (df_females_3)')
+visualize.show_correlation_matrix(df_females_stress, 'Matrice di Correlazione (df_females_stress)')
+
 # # %OP = OP/(OP+CL)*100
 # t%OP = tOP/(tOP+tCL+tCENT)*100
 # tCENT = (300-tOP-tCL)
 try:
-    df_females = df_females.drop(columns=['tOP', 'tCL', 'tCENT'])
+    df_females_2 = df_females_2.drop(columns=['tOP', 'tCL', 'tCENT'])
+    df_females_3 = df_females_3.drop(columns=['tOP', 'tCL', 'tCENT'])
+    df_females_stress = df_females_stress.drop(columns=['tOP', 'tCL', 'tCENT'])
 except:
     pass
-    
-X_females = df_females.drop(columns=['target'])
-
-df_females_2 = copy.copy(df_females)
-y_females_unique_text_2 = df_females_2['target'].str.split(' - ').str[0].unique()
-df_females_2['target'] = pd.factorize(df_females_2['target'].str.split(' - ').str[0])[0]
-y_females_2 = df_females_2['target']
-
-df_females_3 = copy.copy(df_females)
-y_females_unique_text_3 = df_females_3['target'].unique()
-df_females_3['target'] = pd.factorize(df_females_3['target'])[0]
-y_females_3 = df_females_3['target']
-
-df_females_stress = copy.copy(df_females)
-df_females_stress = df_females_stress[df_females_stress['target'] != 'no stress']
-X_females_stress = df_females_stress.drop(columns=['target'])
-y_females_unique_text_stress = df_females_stress['target'].unique()
-df_females_stress['target'] = pd.factorize(df_females_stress['target'])[0]
-y_females_stress = df_females_stress['target']
-# -
-
-# Matrice di correlazione
-visualize.show_correlation_matrix(df_females_2, 'Matrice di Correlazione (df_females_2)')
-visualize.show_correlation_matrix(df_females_3, 'Matrice di Correlazione (df_females_3)')
-visualize.show_correlation_matrix(df_females_stress, 'Matrice di Correlazione (df_females_stress)')
 
 # +
 # PCA_X_FEMALES
@@ -347,9 +334,7 @@ visualize.show_cumulative_explained_variance(explained_variance, 'Cumulative Exp
 # -
 
 # PCA con 2 componenti
-pca_females_2c = PCA(n_components=2)
-X_females_2c = pca_females_2c.fit_transform(StandardScaler().fit_transform(X_females))
-pd.DataFrame(pca_females_2c.components_, columns=X_females.columns, index=[f'Cmp {i+1}' for i in range(pca_females_2c.n_components_)])
+X_females_2c = show_linear_transform_table(2, X_females)
 
 # Plot PCA 2 componenti, 2 e 3 target
 visualize.show_scatter_plot(X_females_2c, y_females_2, y_females_unique_text_2, ['b', 'm'], 'PCA - Scatter Plot (df_females_2)')
@@ -372,9 +357,7 @@ svc_kernels(X_females_2c, y_females_3.values, y_females_unique_text_3, ['b', 'm'
             replace=False)
 
 # PCA con 3 componenti
-pca_females_3c = PCA(n_components=3)
-X_females_3c = pca_females_3c.fit_transform(StandardScaler().fit_transform(X_females))
-pd.DataFrame(pca_females_3c.components_, columns=X_females.columns, index=[f'Cmp {i+1}' for i in range(pca_females_3c.n_components_)])
+X_females_3c = show_linear_transform_table(3, X_females)
 
 # Scatter Plot 3D dei dati trasformati da PCA con 3 componenti
 visualize.show_3D_scatter_plot(X_females_3c, y_females_2, y_females_unique_text_2, ['b', 'm'], 'Scatter Plot (df_females_2)')
@@ -393,9 +376,7 @@ svc_kernels(X_females_3c, y_females_3.values, y_females_unique_text_3, ['b', 'm'
             replace=False)
 
 # PCA con min_components_x_females
-pca_females_minc = PCA(n_components=minc_x_females)
-X_females_minc = pca_females_minc.fit_transform(StandardScaler().fit_transform(X_females))
-pd.DataFrame(pca_females_minc.components_, columns=X_females.columns, index=[f'Cmp {i+1}' for i in range(pca_females_minc.n_components_)])
+X_females_minc = show_linear_transform_table(minc_x_females, X_females)
 
 # SVC_KERNELS_MINC_FEMALES_T2
 svc_kernels(X_females_minc, y_females_2.values, y_females_unique_text_2, ['b', 'm'],
@@ -437,9 +418,7 @@ visualize.show_cumulative_explained_variance(explained_variance, 'Cumulative Exp
 # -
 
 # PCA con due componenti
-pca_females_stress_2c = PCA(n_components=2)
-X_females_stress_2c = pca_females_stress_2c.fit_transform(StandardScaler().fit_transform(X_females_stress))
-pd.DataFrame(pca_females_stress_2c.components_, columns=X_females_stress.columns, index=[f'Cmp {i+1}' for i in range(pca_females_stress_2c.n_components_)])
+X_females_stress_2c = show_linear_transform_table(2, X_females_stress)
 
 # Plot PCA 2 componenti
 visualize.show_scatter_plot(X_females_stress_2c, y_females_stress, y_females_unique_text_stress, ['b', 'm'], 'PCA - Scatter Plot (df_females_stress)')
@@ -454,9 +433,7 @@ svc_kernels(X_females_stress_2c, y_females_stress.values, y_females_unique_text_
             replace=False)
 
 # PCA con 3 componenti
-pca_females_stress_3c = PCA(n_components=3)
-X_females_stress_3c = pca_females_stress_3c.fit_transform(StandardScaler().fit_transform(X_females_stress))
-pd.DataFrame(pca_females_stress_3c.components_, columns=X_females_stress.columns, index=[f'Cmp {i+1}' for i in range(pca_females_stress_3c.n_components_)])
+X_females_stress_3c = show_linear_transform_table(3, X_females_stress)
 
 # Scatter Plot 3D dei dati trasformati da PCA con 3 componenti
 visualize.show_3D_scatter_plot(X_females_stress_3c, y_females_stress, y_females_unique_text_stress, ['b', 'm'], 'Scatter Plot (df_females_stress)')
@@ -468,9 +445,7 @@ svc_kernels(X_females_stress_3c, y_females_stress.values, y_females_unique_text_
             replace=False)
 
 # PCA con minc_x_females_stress
-pca_females_stress_minc = PCA(n_components=minc_x_females_stress)
-X_females_stress_minc = pca_females_stress_minc.fit_transform(StandardScaler().fit_transform(X_females_stress))
-pd.DataFrame(pca_females_stress_minc.components_, columns=X_females_stress.columns, index=[f'Cmp {i+1}' for i in range(pca_females_stress_minc.n_components_)])
+X_females_stress_minc = show_linear_transform_table(minc_x_females_stress, X_females_stress)
 
 # SVC_KERNELS_MINC_FEMALES_STRESS
 svc_kernels(X_females_stress_minc, y_females_stress.values, y_females_unique_text_stress, ['b', 'm'],
