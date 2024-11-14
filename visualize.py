@@ -173,6 +173,15 @@ def display_table(learned_models):
             df.loc[model_name, (scorer, 'std')] = round(result['std'], 3)
 
     display(df)
+
+
+def display_hyperparameters(model_name, param_grid, learned_model):
+    columns = ['scaler'] + list(param_grid.keys())
+    values = [learned_model.get_params()['scaler']] + [
+        learned_model.get_params()['classifier'].get_params()[column] for column in columns[1:]
+    ]
+    df = pd.DataFrame([values], index=[model_name], columns=columns)
+    display(df)
             
 
 def plot_tree(columns, y_text, learned_model, title):

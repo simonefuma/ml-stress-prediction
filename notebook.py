@@ -19,11 +19,9 @@ for module in [ml, visualize]:
 
 # +
 # TO-DO:
-# tutti i topi
 # visualizzare i grafici svc sulle prime due componenti
 # visualizzare iperparametri dei modelli allenati
 # cambiare come ottenere models, per modificare iperparametri (in knn con il cambiare di X cambia il set di k)
-# controllare gli split in tutti i topi se vanno bene
 # -
 
 # # Util
@@ -59,6 +57,9 @@ def svc_kernels(X, y, y_unique_text, colors, models, test_scorers,
                                  replace=False)
 
     visualize.display_table(learned_models)
+    for model, learned_model in zip(models, learned_models):
+        visualize.display_hyperparameters(model['name'], model['param_grid'], learned_model['model'])
+        
     try:
         visualize.show_svc_decision_boundary(X, y, y_unique_text, learned_models, colors)
     except:
@@ -75,6 +76,9 @@ def models(X, y, y_unique_text, models, test_scorers,
                                  test_scorers=test_scorers, index_test_scorer=index_test_scorer, minimize_test_scorer=minimize_test_scorer, 
                                  replace=False)
     visualize.display_table(learned_models)
+    for model, learned_model in zip(models, learned_models):
+        visualize.display_hyperparameters(model['name'], model['param_grid'], learned_model['model'])
+    
     for learned_model in learned_models:
         if(learned_model['model'].named_steps['classifier'].__class__.__name__ == 'DecisionTreeClassifier'):
             visualize.plot_tree(X.columns, y_unique_text, learned_model['model'].named_steps['classifier'], learned_model['model_name'])
