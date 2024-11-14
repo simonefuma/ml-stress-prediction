@@ -20,7 +20,6 @@ for module in [ml, visualize]:
 # +
 # TO-DO:
 # visualizzare i grafici svc sulle prime due componenti
-# visualizzare iperparametri dei modelli allenati
 # cambiare come ottenere models, per modificare iperparametri (in knn con il cambiare di X cambia il set di k)
 # -
 
@@ -54,7 +53,7 @@ def svc_kernels(X, y, y_unique_text, colors, models, test_scorers,
                                  StratifiedKFold(n_splits=outer_split, shuffle=True, random_state=RANDOM_STATE),
                                  StratifiedKFold(n_splits=inner_split, shuffle=True, random_state=RANDOM_STATE),
                                  test_scorers=test_scorers, index_test_scorer=0, minimize_test_scorer=False, 
-                                 replace=False)
+                                 replace=replace)
 
     visualize.display_table(learned_models)
     for model, learned_model in zip(models, learned_models):
@@ -74,7 +73,7 @@ def models(X, y, y_unique_text, models, test_scorers,
                                  StratifiedKFold(n_splits=outer_split, shuffle=True, random_state=RANDOM_STATE),
                                  StratifiedKFold(n_splits=inner_split, shuffle=True, random_state=RANDOM_STATE),
                                  test_scorers=test_scorers, index_test_scorer=index_test_scorer, minimize_test_scorer=minimize_test_scorer, 
-                                 replace=False)
+                                 replace=replace)
     visualize.display_table(learned_models)
     for model, learned_model in zip(models, learned_models):
         visualize.display_hyperparameters(model['name'], model['param_grid'], learned_model['model'])
@@ -213,8 +212,8 @@ svc_kernels(X_males_minc, y_males_2.values, y_males_unique_text_2, ['b', 'm'],
 visualize.show_cluster_table(2, StandardScaler().fit_transform(X_males), y_males_2, y_males_unique_text_2, 'df_males_2')
 
 # MODELS_X_MALES_T2
-models(X_males, y_males_2.values, y_males_unique_text_2, 
-       ml.get_models(ml.MODELS, '_X_MALES_T2'), 
+models(X_males, y_males_2.values, y_males_unique_text_2,
+       ml.get_custom_models('_X_MALES_T2', 13),
        ml.get_binary_scorers(), 
        replace=False)
 
@@ -268,8 +267,8 @@ svc_kernels(X_males_stress_minc, y_males_stress.values, y_males_unique_text_stre
 visualize.show_cluster_table(2, StandardScaler().fit_transform(X_males_stress), y_males_stress, y_males_unique_text_stress, 'df_males_stress')
 
 # MODELS_X_MALES_STRESS
-models(X_males_stress, y_males_stress.values, y_males_unique_text_stress, 
-       ml.get_models(ml.MODELS, '_X_MALES_STRESS'), 
+models(X_males_stress, y_males_stress.values, y_males_unique_text_stress,
+       ml.get_custom_models('_X_MALES_STRESS', 9),
        ml.get_binary_scorers(), 
        replace=False)
 
@@ -323,8 +322,8 @@ svc_kernels(X_males_minc, y_males_3.values, y_males_unique_text_3, ['b', 'm', 'g
 visualize.show_cluster_table(3, StandardScaler().fit_transform(X_males), y_males_3, y_males_unique_text_3, 'df_males_3')
 
 # MODELS_X_MALES_T3
-models(X_males, y_males_3.values, y_males_unique_text_3, 
-       ml.get_models(ml.MODELS, '_X_MALES_T3'), 
+models(X_males, y_males_3.values, y_males_unique_text_3,  
+       ml.get_custom_models('_X_MALES_T3', 13),
        ml.get_multiclass_scorers(), 
        replace=False)
 
@@ -451,7 +450,7 @@ visualize.show_cluster_table(2, StandardScaler().fit_transform(X_females), y_fem
 
 # MODELS_X_FEMALES_T2
 models(X_females, y_females_2.values, y_females_unique_text_2, 
-       ml.get_models(ml.MODELS, '_X_FEMALES_T2'), 
+       ml.get_custom_models('_X_FEMALES_T2', 13),
        ml.get_binary_scorers(), 
        replace=False)
 
@@ -505,8 +504,8 @@ svc_kernels(X_females_stress_minc, y_females_stress.values, y_females_unique_tex
 visualize.show_cluster_table(2, StandardScaler().fit_transform(X_females_stress), y_females_stress, y_females_unique_text_stress, 'df_females_stress')
 
 # MODELS_X_FEMALES_STRESS
-models(X_females_stress, y_females_stress.values, y_females_unique_text_stress, 
-       ml.get_models(ml.MODELS, '_X_FEMALES_STRESS'), 
+models(X_females_stress, y_females_stress.values, y_females_unique_text_stress,
+       ml.get_custom_models('_X_FEMALES_STRESS', 9),
        ml.get_binary_scorers(), 
        replace=False)
 
@@ -560,8 +559,8 @@ svc_kernels(X_females_minc, y_females_3.values, y_females_unique_text_3, ['b', '
 visualize.show_cluster_table(3, StandardScaler().fit_transform(X_females), y_females_3, y_females_unique_text_3, 'df_females_3')
 
 # MODELS_X_FEMALES_T3
-models(X_females, y_females_3.values, y_females_unique_text_3, 
-       ml.get_models(ml.MODELS, '_X_FEMALES_T3'), 
+models(X_females, y_females_3.values, y_females_unique_text_3,
+       ml.get_custom_models('_X_FEMALES_T3', 13), 
        ml.get_multiclass_scorers(), 
        replace=False)
 
@@ -679,8 +678,8 @@ svc_kernels(X_all_minc, y_all_2.values, y_all_unique_text_2, ['b', 'm'],
 visualize.show_cluster_table(2, StandardScaler().fit_transform(X_all), y_all_2, y_all_unique_text_2, 'df_all_2')
 
 # MODELS_X_ALL_T2
-models(X_all, y_all_2.values, y_all_unique_text_2, 
-       ml.get_models(ml.MODELS, '_X_ALL_T2'), 
+models(X_all, y_all_2.values, y_all_unique_text_2,
+       ml.get_custom_models('_X_ALL_T2', 25), 
        ml.get_binary_scorers(), 
        replace=False)
 
@@ -734,8 +733,8 @@ svc_kernels(X_all_stress_minc, y_all_stress.values, y_all_unique_text_stress, ['
 visualize.show_cluster_table(2, StandardScaler().fit_transform(X_all_stress), y_all_stress, y_all_unique_text_stress, 'df_all_stress')
 
 # MODELS_X_ALL_STRESS
-models(X_all_stress, y_all_stress.values, y_all_unique_text_stress, 
-       ml.get_models(ml.MODELS, '_X_ALL_STRESS'), 
+models(X_all_stress, y_all_stress.values, y_all_unique_text_stress,
+       ml.get_custom_models('_X_ALL_STRESS', 17), 
        ml.get_binary_scorers(), 
        replace=False)
 
@@ -789,10 +788,14 @@ svc_kernels(X_all_minc, y_all_3.values, y_all_unique_text_3, ['b', 'm', 'g'],
 visualize.show_cluster_table(3, StandardScaler().fit_transform(X_all), y_all_3, y_all_unique_text_3, 'df_all_3')
 
 # MODELS_X_ALL_T3
-models(X_all, y_all_3.values, y_all_unique_text_3, 
-       ml.get_models(ml.MODELS, '_X_ALL_T3'), 
+models(X_all, y_all_3.values, y_all_unique_text_3,
+       ml.get_custom_models('_X_ALL_T3', 25),
        ml.get_multiclass_scorers(), 
        replace=False)
+
+
+
+
 
 
 

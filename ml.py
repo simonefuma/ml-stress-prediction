@@ -55,7 +55,7 @@ MODELS = [
         'name': 'KNeighborsClassifier',
         'param_grid': 
         {
-            'n_neighbors': [1, 3, 5, 7],
+            'n_neighbors': [],
             'metric': ['cityblock', 'cosine', 'euclidean', 'l2', 'l1', 'manhattan', 'nan_euclidean']
         }
     },
@@ -124,6 +124,11 @@ def get_multiclass_scorers():
             multiclass_scorers.append(multiclass_score)
     multiclass_scorers.append(specificity_score)
     return multiclass_scorers
+
+def get_custom_models(postfix, n):
+    models = get_models(MODELS, postfix)
+    models[0]['param_grid']['n_neighbors'] = [i for i in range(1, n, 2)]
+    return models
 
 def get_models(models, postfix):
     return [{'model': model['model'], 
