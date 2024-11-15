@@ -130,7 +130,12 @@ def show_svc_decision_boundary(X, y, y_text, models, colors):
         y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
         xx, yy = np.meshgrid(np.arange(x_min, x_max, h), np.arange(y_min, y_max, h))
 
-        Z = model['model'].predict(np.c_[xx.ravel(), yy.ravel()])
+        grid = np.c_[xx.ravel(), yy.ravel()]
+        if X.shape[1] > 2:
+            extra_dims = np.zeros((grid.shape[0], X.shape[1] - 2))
+            grid = np.hstack([grid, extra_dims])
+
+        Z = model['model'].predict(grid)
         Z = Z.reshape(xx.shape)
 
         ax.contourf(xx, yy, Z, alpha=0.3, cmap=ListedColormap(colors))

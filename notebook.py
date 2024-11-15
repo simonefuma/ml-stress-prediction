@@ -20,7 +20,6 @@ for module in [ml, visualize]:
 # +
 # TO-DO:
 # visualizzare i grafici svc sulle prime due componenti
-# cambiare come ottenere models, per modificare iperparametri (in knn con il cambiare di X cambia il set di k)
 # -
 
 # # Util
@@ -59,10 +58,10 @@ def svc_kernels(X, y, y_unique_text, colors, models, test_scorers,
     for model, learned_model in zip(models, learned_models):
         visualize.display_hyperparameters(model['name'], model['param_grid'], learned_model['model'])
         
-    try:
-        visualize.show_svc_decision_boundary(X, y, y_unique_text, learned_models, colors)
-    except:
-        pass
+    #try:
+    visualize.show_svc_decision_boundary(X, y, y_unique_text, learned_models, colors)
+    #except:
+    #    pass
 
 
 def models(X, y, y_unique_text, models, test_scorers,
@@ -792,13 +791,3 @@ models(X_all, y_all_3.values, y_all_unique_text_3,
        ml.get_custom_models('_X_ALL_T3', 25),
        ml.get_multiclass_scorers(), 
        replace=False)
-
-
-
-
-
-
-
-
-
-
