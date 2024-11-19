@@ -49,6 +49,18 @@ SVC_KERNELS = [
     }
 ]
 
+DECISIONTREE = [{
+    'model': DecisionTreeClassifier(random_state=RANDOM_STATE),
+    'name': 'DecisionTreeClassifier',
+    'param_grid': {
+        'criterion': ['gini', 'entropy', 'log_loss'],
+        'splitter': ['best', 'random'],
+        'max_depth': [None, 1, 2, 3, 4, 5, 10, 15, 20],
+        'min_samples_split': [0.01, 0.05, 0.1, 0.2, 0.3],
+        'min_samples_leaf': [1, 0.05, 0.1, 0.2, 0.3]
+    }
+}]
+
 MODELS = [
     {
         'model': KNeighborsClassifier(),
@@ -79,7 +91,7 @@ MODELS = [
             'splitter': ['best', 'random'],
             'max_depth': [None, 1, 2, 3, 4, 5, 10, 15, 20],
             'min_samples_split': [0.01, 0.05, 0.1, 0.2, 0.3],
-            'min_samples_leaf': [1, 0.05, 0.1, 0.2, 0.3],
+            'min_samples_leaf': [1, 0.05, 0.1, 0.2, 0.3]
         }
     },
     {
@@ -91,7 +103,7 @@ MODELS = [
             'criterion': ['gini', 'entropy', 'log_loss'],
             'max_depth': [None, 1, 2, 3, 4, 5, 10, 15, 20],
             'min_samples_split': [0.01, 0.05, 0.1, 0.2, 0.3],
-            'min_samples_leaf': [1, 0.05, 0.1, 0.2, 0.3],
+            'min_samples_leaf': [1, 0.05, 0.1, 0.2, 0.3]
         }
     }
 ]

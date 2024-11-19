@@ -17,9 +17,6 @@ for module in [ml, visualize]:
     importlib.reload(module)
 
 
-# +
-# TO-DO:
-# visualizzare i grafici svc sulle prime due componenti
 # -
 
 # # Util
