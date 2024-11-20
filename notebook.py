@@ -198,7 +198,7 @@ svc_kernels_x2_males_t2 = svc_kernels(X_males_2c, y_males_2.values, y_males_uniq
 # MODELS_X2_MALES_T2
 models_x2_males_t2 = models(pd.DataFrame(X_males_2c, columns=[f"Cmp_{i}" for i in range(X_males_2c.shape[1])]), 
                            y_males_2.values, y_males_unique_text_2, 
-                           ml.get_models(ml.DECISIONTREE, '_X2_MALES_T2'), 
+                           ml.get_custom_models(ml.PCA_MODELS, '_X2_MALES_T2', 13), 
                            ml.get_binary_scorers())
 
 linear_trasformation_males = np.where(
@@ -225,8 +225,8 @@ svc_kernels_x2_males_t2_modified = svc_kernels(X_males_2c_modified, y_males_2.va
 
 # MODELS_X2_MODIFIED_MALES_T2
 models_x2_males_t2_modified = models(pd.DataFrame(X_males_2c_modified, columns=[f"Cmp_{i}" for i in range(X_males_2c_modified.shape[1])]), 
-                           y_males_2.values, y_males_unique_text_2, 
-                           ml.get_models(ml.DECISIONTREE, '_X2_MODIFIED_MALES_T2'), 
+                           y_males_2.values, y_males_unique_text_2,
+                           ml.get_custom_models(ml.PCA_MODELS, '_X2_MODIFIED_MALES_T2', 13),
                            ml.get_binary_scorers())
 
 # #### PCA 3 Componenti
@@ -261,7 +261,7 @@ visualize.show_cluster_table(2, StandardScaler().fit_transform(X_males), y_males
 
 # MODELS_X_MALES_T2
 learned_models_x_males_t2 = models(X_males, y_males_2.values, y_males_unique_text_2,
-                                   ml.get_custom_models('_X_MALES_T2', 13),
+                                   ml.get_custom_models(ml.MODELS, '_X_MALES_T2', 13),
                                    ml.get_binary_scorers(), 
                                    replace=False)
 
@@ -316,7 +316,7 @@ visualize.show_cluster_table(2, StandardScaler().fit_transform(X_males_stress), 
 
 # MODELS_X_MALES_STRESS
 _ = models(X_males_stress, y_males_stress.values, y_males_unique_text_stress,
-       ml.get_custom_models('_X_MALES_STRESS', 9),
+       ml.get_custom_models(ml.MODELS, '_X_MALES_STRESS', 9),
        ml.get_binary_scorers(), 
        replace=False)
 
@@ -371,7 +371,7 @@ visualize.show_cluster_table(3, StandardScaler().fit_transform(X_males), y_males
 
 # MODELS_X_MALES_T3
 _ = models(X_males, y_males_3.values, y_males_unique_text_3,  
-       ml.get_custom_models('_X_MALES_T3', 13),
+       ml.get_custom_models(ml.MODELS, '_X_MALES_T3', 13),
        ml.get_multiclass_scorers(), 
        replace=False)
 
@@ -470,8 +470,8 @@ svc_kernels_x2_females_t2 = svc_kernels(X_females_2c, y_females_2.values, y_fema
 
 # MODELS_X2_FEMALES_T2
 models_x2_females_t2 = models(pd.DataFrame(X_females_2c, columns=[f"Cmp_{i}" for i in range(X_females_2c.shape[1])]), 
-                               y_females_2.values, y_females_unique_text_2, 
-                               ml.get_models(ml.DECISIONTREE, '_X2_FEMALES_T2'), 
+                               y_females_2.values, y_females_unique_text_2,
+                               ml.get_custom_models(ml.PCA_MODELS, '_X2_FEMALES_T2', 13),
                                ml.get_binary_scorers())
 
 linear_trasformation_females = np.where(
@@ -498,8 +498,8 @@ svc_kernels_x2_females_t2_modified = svc_kernels(X_females_2c_modified, y_female
 
 # MODELS_X2_MODIFIED_FEMALES_T2
 models_x2_females_t2_modified = models(pd.DataFrame(X_females_2c, columns=[f"Cmp_{i}" for i in range(X_females_2c.shape[1])]), 
-                                       y_females_2.values, y_females_unique_text_2, 
-                                       ml.get_models(ml.DECISIONTREE, '_X2_MODIFIED_FEMALES_T2'), 
+                                       y_females_2.values, y_females_unique_text_2,
+                                       ml.get_custom_models(ml.PCA_MODELS, '_X2_MODIFIED_FEMALES_T2', 13),
                                        ml.get_binary_scorers())
 
 # #### PCA 3 Componenti
@@ -536,7 +536,7 @@ visualize.show_cluster_table(2, StandardScaler().fit_transform(X_females), y_fem
 # MODELS_X_FEMALES_T2
 
 learned_models_x_females_t2 = models(X_females, y_females_2.values, y_females_unique_text_2, 
-                                    ml.get_custom_models('_X_FEMALES_T2', 13),
+                                    ml.get_custom_models(ml.MODELS, '_X_FEMALES_T2', 13),
                                     ml.get_binary_scorers(), 
                                     replace=False)
 # -
@@ -592,7 +592,7 @@ visualize.show_cluster_table(2, StandardScaler().fit_transform(X_females_stress)
 
 # MODELS_X_FEMALES_STRESS
 _ = models(X_females_stress, y_females_stress.values, y_females_unique_text_stress,
-       ml.get_custom_models('_X_FEMALES_STRESS', 9),
+       ml.get_custom_models(ml.MODELS, '_X_FEMALES_STRESS', 9),
        ml.get_binary_scorers(), 
        replace=False)
 
@@ -647,7 +647,7 @@ visualize.show_cluster_table(3, StandardScaler().fit_transform(X_females), y_fem
 
 # MODELS_X_FEMALES_T3
 _ = models(X_females, y_females_3.values, y_females_unique_text_3,
-       ml.get_custom_models('_X_FEMALES_T3', 13), 
+       ml.get_custom_models(ml.MODELS, '_X_FEMALES_T3', 13), 
        ml.get_multiclass_scorers(), 
        replace=False)
 
@@ -738,8 +738,8 @@ _ = svc_kernels(X_all_2c, y_all_2.values, y_all_unique_text_2, ['b', 'm'],
 
 # MODELS_X2_ALL_T2
 _ = models(pd.DataFrame(X_all_2c, columns=[f"Cmp_{i}" for i in range(X_all_2c.shape[1])]), 
-       y_all_2.values, y_all_unique_text_2, 
-       ml.get_models(ml.DECISIONTREE, '_X2_ALL_T2'), 
+       y_all_2.values, y_all_unique_text_2,
+       ml.get_custom_models(ml.PCA_MODELS, '_X2_ALL_T2', 25),
        ml.get_binary_scorers())
 
 linear_trasformation_all = np.where(
@@ -766,8 +766,8 @@ _ = svc_kernels(X_all_2c_modified, y_all_2.values, y_all_unique_text_2, ['b', 'm
 
 # MODELS_X2_MODIFIED_ALL_T2
 _ = models(pd.DataFrame(X_all_2c_modified, columns=[f"Cmp_{i}" for i in range(X_all_2c.shape[1])]), 
-       y_all_2.values, y_all_unique_text_2, 
-       ml.get_models(ml.DECISIONTREE, '_X2_MODIFIED_ALL_T2'), 
+       y_all_2.values, y_all_unique_text_2,
+       ml.get_custom_models(ml.PCA_MODELS, '_X2_MODIFIED_ALL_T2', 25),
        ml.get_binary_scorers())
 
 # #### PCA 3 Componenti
@@ -802,7 +802,7 @@ visualize.show_cluster_table(2, StandardScaler().fit_transform(X_all), y_all_2, 
 
 # MODELS_X_ALL_T2
 _ = models(X_all, y_all_2.values, y_all_unique_text_2,
-       ml.get_custom_models('_X_ALL_T2', 25), 
+       ml.get_custom_models(ml.MODELS, '_X_ALL_T2', 25), 
        ml.get_binary_scorers(), 
        replace=False)
 
@@ -857,7 +857,7 @@ visualize.show_cluster_table(2, StandardScaler().fit_transform(X_all_stress), y_
 
 # MODELS_X_ALL_STRESS
 _ = models(X_all_stress, y_all_stress.values, y_all_unique_text_stress,
-       ml.get_custom_models('_X_ALL_STRESS', 17), 
+       ml.get_custom_models(ml.MODELS, '_X_ALL_STRESS', 17), 
        ml.get_binary_scorers(), 
        replace=False)
 
@@ -912,7 +912,7 @@ visualize.show_cluster_table(3, StandardScaler().fit_transform(X_all), y_all_3, 
 
 # MODELS_X_ALL_T3
 _ = models(X_all, y_all_3.values, y_all_unique_text_3,
-       ml.get_custom_models('_X_ALL_T3', 25),
+       ml.get_custom_models(ml.MODELS, '_X_ALL_T3', 25),
        ml.get_multiclass_scorers(), 
        replace=False)
 
@@ -953,5 +953,9 @@ show_scores(models_x2_females_t2_modified, pd.DataFrame(X_males_2c), y_males_2)
 # #### Senza PCA
 
 show_scores(learned_models_x_females_t2, X_males, y_males_2)
+
+
+
+
 
 
