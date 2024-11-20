@@ -194,3 +194,20 @@ def plot_tree(columns, y_text, learned_model, title):
     sklearn_plot_tree(learned_model, feature_names=columns, class_names=y_text, filled=True)
     plt.title(title)
     plt.show()
+    
+    usage = ["x" if importance > 0 else "-" for importance in learned_model.feature_importances_]
+    display(pd.DataFrame([usage + [learned_model.get_depth()]], columns=list(columns.values) + ["Depth"], index=[title]))
+
+
+def plot_forest(columns, y_text, learned_model, title):
+    usages = []
+    indexs = []
+    for i, tree in enumerate(learned_model.estimators_):
+        plt.figure(figsize=(12, 12))
+        sklearn_plot_tree(tree, feature_names=columns, class_names=y_text, filled=True)
+        plt.title(f'{title}_{i}')
+        plt.show()
+
+        usages.append(["x" if importance > 0 else "-" for importance in tree.feature_importances_] + [tree.get_depth()])
+        indexs.append(f'{title}_{i}')
+    display(pd.DataFrame(usages, columns=list(columns.values) + ["Depth"], index=indexs))

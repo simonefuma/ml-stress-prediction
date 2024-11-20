@@ -18,10 +18,7 @@ for module in [ml, visualize]:
 
 
 # +
-# fare test dataset maschi modello femmine (pca 2 e set completo, stress/no stress)
-# fare test femmine modello maschi (pca 2 e set completo, stress/no stress)
-# knn pca 2 comp e dataset intero (k=1,3,5)
-# tabella alberi feature e profondità, e mostrare alberi delle foreste
+# eliminare bootstrap dalle random forest?
 # -
 
 # # Util
@@ -80,6 +77,8 @@ def models(X, y, y_unique_text, models, test_scorers,
     for learned_model in learned_models:
         if(learned_model['model'].named_steps['classifier'].__class__.__name__ == 'DecisionTreeClassifier'):
             visualize.plot_tree(X.columns, y_unique_text, learned_model['model'].named_steps['classifier'], learned_model['model_name'])
+        elif(learned_model['model'].named_steps['classifier'].__class__.__name__ == 'RandomForestClassifier'):
+            visualize.plot_forest(X.columns, y_unique_text, learned_model['model'].named_steps['classifier'], learned_model['model_name'])
 
     return learned_models
 
@@ -953,6 +952,8 @@ show_scores(models_x2_females_t2_modified, pd.DataFrame(X_males_2c), y_males_2)
 # #### Senza PCA
 
 show_scores(learned_models_x_females_t2, X_males, y_males_2)
+
+
 
 
 
