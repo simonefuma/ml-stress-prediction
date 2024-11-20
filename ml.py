@@ -49,7 +49,17 @@ SVC_KERNELS = [
     }
 ]
 
-DECISIONTREE = [{
+PCA_MODELS = [
+    {
+        'model': KNeighborsClassifier(),
+        'name': 'KNeighborsClassifier',
+        'param_grid': 
+        {
+            'n_neighbors': [],
+            'metric': ['cityblock', 'cosine', 'euclidean', 'l2', 'l1', 'manhattan', 'nan_euclidean']
+        }
+    },
+    {
     'model': DecisionTreeClassifier(random_state=RANDOM_STATE),
     'name': 'DecisionTreeClassifier',
     'param_grid': {
@@ -59,7 +69,8 @@ DECISIONTREE = [{
         'min_samples_split': [0.01, 0.05, 0.1, 0.2, 0.3],
         'min_samples_leaf': [1, 0.05, 0.1, 0.2, 0.3]
     }
-}]
+}
+]
 
 MODELS = [
     {
@@ -137,8 +148,8 @@ def get_multiclass_scorers():
     multiclass_scorers.append(specificity_score)
     return multiclass_scorers
 
-def get_custom_models(postfix, n):
-    models = get_models(MODELS, postfix)
+def get_custom_models(models, postfix, n):
+    models = get_models(models, postfix)
     models[0]['param_grid']['n_neighbors'] = [i for i in range(1, n, 2)]
     return models
 
