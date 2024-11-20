@@ -60,10 +60,8 @@ def svc_kernels(X, y, y_unique_text, colors, models, test_scorers,
     for model, learned_model in zip(models, learned_models):
         visualize.display_hyperparameters(model['name'], model['param_grid'], learned_model['model'])
         
-    #try:
     visualize.show_svc_decision_boundary(X, y, y_unique_text, learned_models, colors)
-    #except:
-    #    pass
+    return learned_models
 
 
 def models(X, y, y_unique_text, models, test_scorers,
@@ -91,6 +89,17 @@ def show_linear_transform_table(n_components, X):
     X_pca = pca.fit_transform(StandardScaler().fit_transform(X))
     display(pd.DataFrame(pca.components_, columns=X.columns, index=[f'Cmp {i+1}' for i in range(pca.n_components_)]))
     return X_pca, pca.components_
+
+
+def show_scores(learned_models, X, y):
+    scorers = ml.get_binary_scorers()
+    models_name = [learned_model['model_name'] for learned_model in learned_models]
+    scorers_name = [scorer.__name__ for scorer in scorers]
+    scores = [
+        [float(round(scorer(y, learned_model['model'].predict(X.values)), 3)) for scorer in scorers]  
+              for learned_model in learned_models
+    ]
+    display(pd.DataFrame(scores, columns=scorers_name, index=models_name))
 
 
 # # Topi Maschio
@@ -181,16 +190,16 @@ visualize.show_scatter_plot(X_males_2c, y_males_2, y_males_unique_text_2, ['b', 
 visualize.show_cluster_plot(2, X_males_2c, y_males_2, y_males_unique_text_2, ['b', 'm'], 'Cluster Plot (df_males_2)')
 
 # SVC_KERNELS_X2_MALES_T2
-svc_kernels(X_males_2c, y_males_2.values, y_males_unique_text_2, ['b', 'm'],
-            ml.get_models(ml.SVC_KERNELS, '_X2_MALES_T2'), 
-            ml.get_binary_scorers(), 
-            replace=False)
+svc_kernels_x2_males_t2 = svc_kernels(X_males_2c, y_males_2.values, y_males_unique_text_2, ['b', 'm'],
+                                    ml.get_models(ml.SVC_KERNELS, '_X2_MALES_T2'), 
+                                    ml.get_binary_scorers(), 
+                                    replace=False)
 
-# DECISIONTREECLASSIFIER_X2_MALES_T2
-_ = models(pd.DataFrame(X_males_2c, columns=[f"Cmp_{i}" for i in range(X_males_2c.shape[1])]), 
-       y_males_2.values, y_males_unique_text_2, 
-       ml.get_models(ml.DECISIONTREE, '_X2_MALES_T2'), 
-       ml.get_binary_scorers())
+# MODELS_X2_MALES_T2
+models_x2_males_t2 = models(pd.DataFrame(X_males_2c, columns=[f"Cmp_{i}" for i in range(X_males_2c.shape[1])]), 
+                           y_males_2.values, y_males_unique_text_2, 
+                           ml.get_models(ml.DECISIONTREE, '_X2_MALES_T2'), 
+                           ml.get_binary_scorers())
 
 linear_trasformation_males = np.where(
     np.abs(X_males_2c_components) >= np.mean(np.abs(X_males_2c_components), axis=1, keepdims=True), 
@@ -209,16 +218,16 @@ visualize.show_scatter_plot(X_males_2c_modified, y_males_2, y_males_unique_text_
 visualize.show_cluster_plot(2, X_males_2c_modified, y_males_2, y_males_unique_text_2, ['b', 'm'], 'Cluster Plot (df_males_2_modified)')
 
 # SVC_KERNELS_X2_MODIFIED_MALES_T2
-svc_kernels(X_males_2c_modified, y_males_2.values, y_males_unique_text_2, ['b', 'm'],
-            ml.get_models(ml.SVC_KERNELS, '_X2_MODIFIED_MALES_T2'), 
-            ml.get_binary_scorers(), 
-            replace=False)
+svc_kernels_x2_males_t2_modified = svc_kernels(X_males_2c_modified, y_males_2.values, y_males_unique_text_2, ['b', 'm'],
+                                            ml.get_models(ml.SVC_KERNELS, '_X2_MODIFIED_MALES_T2'), 
+                                            ml.get_binary_scorers(), 
+                                            replace=False)
 
-# DECISIONTREECLASSIFIER_X2_MODIFIED_MALES_T2
-_ = models(pd.DataFrame(X_males_2c_modified, columns=[f"Cmp_{i}" for i in range(X_males_2c_modified.shape[1])]), 
-       y_males_2.values, y_males_unique_text_2, 
-       ml.get_models(ml.DECISIONTREE, '_X2_MALES_T2'), 
-       ml.get_binary_scorers())
+# MODELS_X2_MODIFIED_MALES_T2
+models_x2_males_t2_modified = models(pd.DataFrame(X_males_2c_modified, columns=[f"Cmp_{i}" for i in range(X_males_2c_modified.shape[1])]), 
+                           y_males_2.values, y_males_unique_text_2, 
+                           ml.get_models(ml.DECISIONTREE, '_X2_MODIFIED_MALES_T2'), 
+                           ml.get_binary_scorers())
 
 # #### PCA 3 Componenti
 
@@ -229,7 +238,7 @@ X_males_3c, _ = show_linear_transform_table(3, X_males)
 visualize.show_3D_scatter_plot(X_males_3c, y_males_2, y_males_unique_text_2, ['b', 'm'], 'Scatter Plot (df_males_2)')
 
 # SVC_KERNELS_X3_MALES_T2
-svc_kernels(X_males_3c, y_males_2.values, y_males_unique_text_2, ['b', 'm'],
+_ = svc_kernels(X_males_3c, y_males_2.values, y_males_unique_text_2, ['b', 'm'],
             ml.get_models(ml.SVC_KERNELS, '_X3_MALES_T2'), 
             ml.get_binary_scorers(), 
             replace=False)
@@ -240,7 +249,7 @@ svc_kernels(X_males_3c, y_males_2.values, y_males_unique_text_2, ['b', 'm'],
 X_males_minc, _ = show_linear_transform_table(minc_x_males, X_males)
 
 # SVC_KERNELS_MINC_MALES_T2
-svc_kernels(X_males_minc, y_males_2.values, y_males_unique_text_2, ['b', 'm'],
+_ = svc_kernels(X_males_minc, y_males_2.values, y_males_unique_text_2, ['b', 'm'],
             ml.get_models(ml.SVC_KERNELS, '_MINC_MALES_T2'), 
             ml.get_binary_scorers(), 
             replace=False)
@@ -270,7 +279,7 @@ visualize.show_scatter_plot(X_males_stress_2c, y_males_stress, y_males_unique_te
 visualize.show_cluster_plot(2, X_males_stress_2c, y_males_stress, y_males_unique_text_stress, ['b', 'm'], 'Cluster Plot (df_males_stress)')
 
 # SVC_KERNELS_X2_MALES_STRESS
-svc_kernels(X_males_stress_2c, y_males_stress.values, y_males_unique_text_stress, ['b', 'm'],
+_ = svc_kernels(X_males_stress_2c, y_males_stress.values, y_males_unique_text_stress, ['b', 'm'],
             ml.get_models(ml.SVC_KERNELS, '_X2_MALES_STRESS'), 
             ml.get_binary_scorers(), 
             replace=False)
@@ -284,7 +293,7 @@ X_males_stress_3c, _ = show_linear_transform_table(3, X_males_stress)
 visualize.show_3D_scatter_plot(X_males_stress_3c, y_males_stress, y_males_unique_text_stress, ['b', 'm'], 'Scatter Plot (df_males_stress)')
 
 # SVC_KERNELS_X3_MALES_STRESS
-svc_kernels(X_males_stress_3c, y_males_stress.values, y_males_unique_text_stress, ['b', 'm'],
+_ = svc_kernels(X_males_stress_3c, y_males_stress.values, y_males_unique_text_stress, ['b', 'm'],
             ml.get_models(ml.SVC_KERNELS, '_X3_MALES_STRESS'), 
             ml.get_binary_scorers(), 
             replace=False)
@@ -295,7 +304,7 @@ svc_kernels(X_males_stress_3c, y_males_stress.values, y_males_unique_text_stress
 X_males_stress_minc, _ = show_linear_transform_table(minc_x_males_stress, X_males_stress)
 
 # SVC_KERNELS_MINC_MALES_STRESS
-svc_kernels(X_males_stress_minc, y_males_stress.values, y_males_unique_text_stress, ['b', 'm'],
+_ = svc_kernels(X_males_stress_minc, y_males_stress.values, y_males_unique_text_stress, ['b', 'm'],
             ml.get_models(ml.SVC_KERNELS, '_MINC_MALES_STRESS'), 
             ml.get_binary_scorers(), 
             replace=False)
@@ -325,7 +334,7 @@ visualize.show_scatter_plot(X_males_2c, y_males_3, y_males_unique_text_3, ['b', 
 visualize.show_cluster_plot(3, X_males_2c, y_males_3, y_males_unique_text_3, ['b', 'm', 'g'], 'Cluster Plot (df_males_3)')
 
 # SVC_KERNELS_X2_MALES_T3
-svc_kernels(X_males_2c, y_males_3.values, y_males_unique_text_3, ['b', 'm', 'g'],
+_ = svc_kernels(X_males_2c, y_males_3.values, y_males_unique_text_3, ['b', 'm', 'g'],
             ml.get_models(ml.SVC_KERNELS, '_X2_MALES_T3'), 
             ml.get_multiclass_scorers(), 
             replace=False)
@@ -339,7 +348,7 @@ X_males_3c, _ = show_linear_transform_table(3, X_males)
 visualize.show_3D_scatter_plot(X_males_3c, y_males_3, y_males_unique_text_3, ['b', 'm', 'g'], 'Scatter Plot (df_males_3)')
 
 # SVC_KERNELS_X3_MALES_T3
-svc_kernels(X_males_3c, y_males_3.values, y_males_unique_text_3, ['b', 'm', 'g'],
+_ = svc_kernels(X_males_3c, y_males_3.values, y_males_unique_text_3, ['b', 'm', 'g'],
             ml.get_models(ml.SVC_KERNELS, '_X3_MALES_T3'), 
             ml.get_multiclass_scorers(), 
             replace=False)
@@ -350,7 +359,7 @@ svc_kernels(X_males_3c, y_males_3.values, y_males_unique_text_3, ['b', 'm', 'g']
 X_males_minc, _ = show_linear_transform_table(minc_x_males, X_males)
 
 # SVC_KERNELS_MINC_MALES_T3
-svc_kernels(X_males_minc, y_males_3.values, y_males_unique_text_3, ['b', 'm', 'g'],
+_ = svc_kernels(X_males_minc, y_males_3.values, y_males_unique_text_3, ['b', 'm', 'g'],
             ml.get_models(ml.SVC_KERNELS, '_MINC_MALES_T3'), 
             ml.get_multiclass_scorers(), 
             replace=False)
@@ -454,16 +463,16 @@ visualize.show_scatter_plot(X_females_2c, y_females_2, y_females_unique_text_2, 
 visualize.show_cluster_plot(2, X_females_2c, y_females_2, y_females_unique_text_2, ['b', 'm'], 'Cluster Plot (df_females_2)')
 
 # SVC_KERNELS_X2_FEMALES_T2
-svc_kernels(X_females_2c, y_females_2.values, y_females_unique_text_2, ['b', 'm'],
-            ml.get_models(ml.SVC_KERNELS, '_X2_FEMALES_T2'), 
-            ml.get_binary_scorers(), 
-            replace=False)
+svc_kernels_x2_females_t2 = svc_kernels(X_females_2c, y_females_2.values, y_females_unique_text_2, ['b', 'm'],
+                                        ml.get_models(ml.SVC_KERNELS, '_X2_FEMALES_T2'), 
+                                        ml.get_binary_scorers(), 
+                                        replace=False)
 
-# DECISIONTREECLASSIFIER_X2_FEMALES_T2
-_ = models(pd.DataFrame(X_females_2c, columns=[f"Cmp_{i}" for i in range(X_females_2c.shape[1])]), 
-       y_females_2.values, y_females_unique_text_2, 
-       ml.get_models(ml.DECISIONTREE, '_X2_FEMALES_T2'), 
-       ml.get_binary_scorers())
+# MODELS_X2_FEMALES_T2
+models_x2_females_t2 = models(pd.DataFrame(X_females_2c, columns=[f"Cmp_{i}" for i in range(X_females_2c.shape[1])]), 
+                               y_females_2.values, y_females_unique_text_2, 
+                               ml.get_models(ml.DECISIONTREE, '_X2_FEMALES_T2'), 
+                               ml.get_binary_scorers())
 
 linear_trasformation_females = np.where(
     np.abs(X_females_2c_components) >= np.mean(np.abs(X_females_2c_components), axis=1, keepdims=True), 
@@ -482,16 +491,16 @@ visualize.show_scatter_plot(X_females_2c_modified, y_females_2, y_females_unique
 visualize.show_cluster_plot(2, X_females_2c_modified, y_females_2, y_females_unique_text_2, ['b', 'm'], 'Cluster Plot (df_females_2_modified)')
 
 # SVC_KERNELS_X2_MODIFIED_FEMALES_T2
-svc_kernels(X_females_2c_modified, y_females_2.values, y_females_unique_text_2, ['b', 'm'],
-            ml.get_models(ml.SVC_KERNELS, '_X2_MODIFIED_FEMALES_T2'), 
-            ml.get_binary_scorers(), 
-            replace=False)
+svc_kernels_x2_females_t2_modified = svc_kernels(X_females_2c_modified, y_females_2.values, y_females_unique_text_2, ['b', 'm'],
+                                                ml.get_models(ml.SVC_KERNELS, '_X2_MODIFIED_FEMALES_T2'), 
+                                                ml.get_binary_scorers(), 
+                                                replace=True)
 
-# DECISIONTREECLASSIFIER_X2_MODIFIED_FEMALES_T2
-_ = models(pd.DataFrame(X_females_2c, columns=[f"Cmp_{i}" for i in range(X_females_2c.shape[1])]), 
-       y_females_2.values, y_females_unique_text_2, 
-       ml.get_models(ml.DECISIONTREE, '_X2_MODIFIED_FEMALES_T2'), 
-       ml.get_binary_scorers())
+# MODELS_X2_MODIFIED_FEMALES_T2
+models_x2_females_t2_modified = models(pd.DataFrame(X_females_2c, columns=[f"Cmp_{i}" for i in range(X_females_2c.shape[1])]), 
+                                       y_females_2.values, y_females_unique_text_2, 
+                                       ml.get_models(ml.DECISIONTREE, '_X2_MODIFIED_FEMALES_T2'), 
+                                       ml.get_binary_scorers())
 
 # #### PCA 3 Componenti
 
@@ -502,7 +511,7 @@ X_females_3c, _ = show_linear_transform_table(3, X_females)
 visualize.show_3D_scatter_plot(X_females_3c, y_females_2, y_females_unique_text_2, ['b', 'm'], 'Scatter Plot (df_females_2)')
 
 # SVC_KERNELS_X3_FEMALES_T2
-svc_kernels(X_females_3c, y_females_2.values, y_females_unique_text_2, ['b', 'm'],
+_ = svc_kernels(X_females_3c, y_females_2.values, y_females_unique_text_2, ['b', 'm'],
             ml.get_models(ml.SVC_KERNELS, '_X3_FEMALES_T2'), 
             ml.get_binary_scorers(), 
             replace=False)
@@ -513,7 +522,7 @@ svc_kernels(X_females_3c, y_females_2.values, y_females_unique_text_2, ['b', 'm'
 X_females_minc, _ = show_linear_transform_table(minc_x_females, X_females)
 
 # SVC_KERNELS_MINC_FEMALES_T2
-svc_kernels(X_females_minc, y_females_2.values, y_females_unique_text_2, ['b', 'm'],
+_ = svc_kernels(X_females_minc, y_females_2.values, y_females_unique_text_2, ['b', 'm'],
             ml.get_models(ml.SVC_KERNELS, '_MINC_FEMALES_T2'), 
             ml.get_binary_scorers(), 
             replace=False)
@@ -546,7 +555,7 @@ visualize.show_scatter_plot(X_females_stress_2c, y_females_stress, y_females_uni
 visualize.show_cluster_plot(2, X_females_stress_2c, y_females_stress, y_females_unique_text_stress, ['b', 'm'], 'Cluster Plot (df_females_stress)')
 
 # SVC_KERNELS_X2_FEMALES_STRESS
-svc_kernels(X_females_stress_2c, y_females_stress.values, y_females_unique_text_stress, ['b', 'm'],
+_ = svc_kernels(X_females_stress_2c, y_females_stress.values, y_females_unique_text_stress, ['b', 'm'],
             ml.get_models(ml.SVC_KERNELS, '_X2_FEMALES_STRESS'), 
             ml.get_binary_scorers(), 
             replace=False)
@@ -560,7 +569,7 @@ X_females_stress_3c, _ = show_linear_transform_table(3, X_females_stress)
 visualize.show_3D_scatter_plot(X_females_stress_3c, y_females_stress, y_females_unique_text_stress, ['b', 'm'], 'Scatter Plot (df_females_stress)')
 
 # SVC_KERNELS_X3_FEMALES_STRESS
-svc_kernels(X_females_stress_3c, y_females_stress.values, y_females_unique_text_stress, ['b', 'm'],
+_ = svc_kernels(X_females_stress_3c, y_females_stress.values, y_females_unique_text_stress, ['b', 'm'],
             ml.get_models(ml.SVC_KERNELS, '_X3_FEMALES_STRESS'), 
             ml.get_binary_scorers(), 
             replace=False)
@@ -571,7 +580,7 @@ svc_kernels(X_females_stress_3c, y_females_stress.values, y_females_unique_text_
 X_females_stress_minc, _ = show_linear_transform_table(minc_x_females_stress, X_females_stress)
 
 # SVC_KERNELS_MINC_FEMALES_STRESS
-svc_kernels(X_females_stress_minc, y_females_stress.values, y_females_unique_text_stress, ['b', 'm'],
+_ = svc_kernels(X_females_stress_minc, y_females_stress.values, y_females_unique_text_stress, ['b', 'm'],
             ml.get_models(ml.SVC_KERNELS, '_MINC_FEMALES_STRESS'), 
             ml.get_binary_scorers(), 
             replace=False)
@@ -601,7 +610,7 @@ visualize.show_scatter_plot(X_females_2c, y_females_3, y_females_unique_text_3, 
 visualize.show_cluster_plot(3, X_females_2c, y_females_3, y_females_unique_text_3, ['b', 'm', 'g'], 'Cluster Plot (df_females_3)')
 
 # SVC_KERNELS_X2_FEMALES_T3
-svc_kernels(X_females_2c, y_females_3.values, y_females_unique_text_3, ['b', 'm', 'g'],
+_ = svc_kernels(X_females_2c, y_females_3.values, y_females_unique_text_3, ['b', 'm', 'g'],
             ml.get_models(ml.SVC_KERNELS, '_X2_FEMALES_T3'), 
             ml.get_multiclass_scorers(), 
             replace=False)
@@ -615,7 +624,7 @@ X_females_3c, _ = show_linear_transform_table(3, X_females)
 visualize.show_3D_scatter_plot(X_females_3c, y_females_3, y_females_unique_text_3, ['b', 'm', 'g'], 'Scatter Plot (df_females_3)')
 
 # SVC_KERNELS_X3_FEMALES_T3
-svc_kernels(X_females_3c, y_females_3.values, y_females_unique_text_3, ['b', 'm', 'g'],
+_ = svc_kernels(X_females_3c, y_females_3.values, y_females_unique_text_3, ['b', 'm', 'g'],
             ml.get_models(ml.SVC_KERNELS, '_X3_FEMALES_T3'), 
             ml.get_multiclass_scorers(), 
             replace=False)
@@ -626,7 +635,7 @@ svc_kernels(X_females_3c, y_females_3.values, y_females_unique_text_3, ['b', 'm'
 X_females_minc, _ = show_linear_transform_table(minc_x_females, X_females)
 
 # SVC_KERNELS_MINC_FEMALES_T3
-svc_kernels(X_females_minc, y_females_3.values, y_females_unique_text_3, ['b', 'm', 'g'],
+_ = svc_kernels(X_females_minc, y_females_3.values, y_females_unique_text_3, ['b', 'm', 'g'],
             ml.get_models(ml.SVC_KERNELS, '_MINC_FEMALES_T3'), 
             ml.get_multiclass_scorers(), 
             replace=False)
@@ -722,12 +731,12 @@ visualize.show_scatter_plot(X_all_2c, y_all_2, y_all_unique_text_2, ['b', 'm'], 
 visualize.show_cluster_plot(2, X_all_2c, y_all_2, y_all_unique_text_2, ['b', 'm'], 'Cluster Plot (df_all_2)')
 
 # SVC_KERNELS_X2_ALL_T2
-svc_kernels(X_all_2c, y_all_2.values, y_all_unique_text_2, ['b', 'm'],
+_ = svc_kernels(X_all_2c, y_all_2.values, y_all_unique_text_2, ['b', 'm'],
             ml.get_models(ml.SVC_KERNELS, '_X2_ALL_T2'), 
             ml.get_binary_scorers(), 
             replace=False)
 
-# DECISIONTREECLASSIFIER_X2_ALL_T2
+# MODELS_X2_ALL_T2
 _ = models(pd.DataFrame(X_all_2c, columns=[f"Cmp_{i}" for i in range(X_all_2c.shape[1])]), 
        y_all_2.values, y_all_unique_text_2, 
        ml.get_models(ml.DECISIONTREE, '_X2_ALL_T2'), 
@@ -750,12 +759,12 @@ visualize.show_scatter_plot(X_all_2c_modified, y_all_2, y_all_unique_text_2, ['b
 visualize.show_cluster_plot(2, X_all_2c_modified, y_all_2, y_all_unique_text_2, ['b', 'm'], 'Cluster Plot (df_all_2_modified)')
 
 # SVC_KERNELS_X2_MODIFIED_ALL_T2
-svc_kernels(X_all_2c_modified, y_all_2.values, y_all_unique_text_2, ['b', 'm'],
+_ = svc_kernels(X_all_2c_modified, y_all_2.values, y_all_unique_text_2, ['b', 'm'],
             ml.get_models(ml.SVC_KERNELS, '_X2_MODIFIED_ALL_T2'), 
             ml.get_binary_scorers(), 
             replace=False)
 
-# DECISIONTREECLASSIFIER_X2_MODIFIED_ALL_T2
+# MODELS_X2_MODIFIED_ALL_T2
 _ = models(pd.DataFrame(X_all_2c_modified, columns=[f"Cmp_{i}" for i in range(X_all_2c.shape[1])]), 
        y_all_2.values, y_all_unique_text_2, 
        ml.get_models(ml.DECISIONTREE, '_X2_MODIFIED_ALL_T2'), 
@@ -770,7 +779,7 @@ X_all_3c, _ = show_linear_transform_table(3, X_all)
 visualize.show_3D_scatter_plot(X_all_3c, y_all_2, y_all_unique_text_2, ['b', 'm'], 'Scatter Plot (df_all_2)')
 
 # SVC_KERNELS_X3_ALL_T2
-svc_kernels(X_all_3c, y_all_2.values, y_all_unique_text_2, ['b', 'm'],
+_ = svc_kernels(X_all_3c, y_all_2.values, y_all_unique_text_2, ['b', 'm'],
             ml.get_models(ml.SVC_KERNELS, '_X3_ALL_T2'), 
             ml.get_binary_scorers(), 
             replace=False)
@@ -781,7 +790,7 @@ svc_kernels(X_all_3c, y_all_2.values, y_all_unique_text_2, ['b', 'm'],
 X_all_minc, _ = show_linear_transform_table(minc_x_all, X_all)
 
 # SVC_KERNELS_MINC_ALL_T2
-svc_kernels(X_all_minc, y_all_2.values, y_all_unique_text_2, ['b', 'm'],
+_ = svc_kernels(X_all_minc, y_all_2.values, y_all_unique_text_2, ['b', 'm'],
             ml.get_models(ml.SVC_KERNELS, '_MINC_ALL_T2'), 
             ml.get_binary_scorers(), 
             replace=False)
@@ -811,7 +820,7 @@ visualize.show_scatter_plot(X_all_stress_2c, y_all_stress, y_all_unique_text_str
 visualize.show_cluster_plot(2, X_all_stress_2c, y_all_stress, y_all_unique_text_stress, ['b', 'm'], 'Cluster Plot (df_all_stress)')
 
 # SVC_KERNELS_X2_ALL_STRESS
-svc_kernels(X_all_stress_2c, y_all_stress.values, y_all_unique_text_stress, ['b', 'm'],
+_ = svc_kernels(X_all_stress_2c, y_all_stress.values, y_all_unique_text_stress, ['b', 'm'],
             ml.get_models(ml.SVC_KERNELS, '_X2_ALL_STRESS'), 
             ml.get_binary_scorers(), 
             replace=False)
@@ -825,7 +834,7 @@ X_all_stress_3c, _ = show_linear_transform_table(3, X_all_stress)
 visualize.show_3D_scatter_plot(X_all_stress_3c, y_all_stress, y_all_unique_text_stress, ['b', 'm'], 'Scatter Plot (df_all_stress)')
 
 # SVC_KERNELS_X3_ALL_STRESS
-svc_kernels(X_all_stress_3c, y_all_stress.values, y_all_unique_text_stress, ['b', 'm'],
+_ = svc_kernels(X_all_stress_3c, y_all_stress.values, y_all_unique_text_stress, ['b', 'm'],
             ml.get_models(ml.SVC_KERNELS, '_X3_ALL_STRESS'), 
             ml.get_binary_scorers(), 
             replace=False)
@@ -836,7 +845,7 @@ svc_kernels(X_all_stress_3c, y_all_stress.values, y_all_unique_text_stress, ['b'
 X_all_stress_minc, _ = show_linear_transform_table(minc_x_all_stress, X_all_stress)
 
 # SVC_KERNELS_MINC_ALL_STRESS
-svc_kernels(X_all_stress_minc, y_all_stress.values, y_all_unique_text_stress, ['b', 'm'],
+_ = svc_kernels(X_all_stress_minc, y_all_stress.values, y_all_unique_text_stress, ['b', 'm'],
             ml.get_models(ml.SVC_KERNELS, '_MINC_ALL_STRESS'), 
             ml.get_binary_scorers(), 
             replace=False)
@@ -866,7 +875,7 @@ visualize.show_scatter_plot(X_all_2c, y_all_3, y_all_unique_text_3, ['b', 'm', '
 visualize.show_cluster_plot(3, X_all_2c, y_all_3, y_all_unique_text_3, ['b', 'm', 'g'], 'Cluster Plot (df_all_3)')
 
 # SVC_KERNELS_X2_ALL_T3
-svc_kernels(X_all_2c, y_all_3.values, y_all_unique_text_3, ['b', 'm', 'g'],
+_ = svc_kernels(X_all_2c, y_all_3.values, y_all_unique_text_3, ['b', 'm', 'g'],
             ml.get_models(ml.SVC_KERNELS, '_X2_ALL_T3'), 
             ml.get_multiclass_scorers(), 
             replace=False)
@@ -880,7 +889,7 @@ X_all_3c, _ = show_linear_transform_table(3, X_all)
 visualize.show_3D_scatter_plot(X_all_3c, y_all_3, y_all_unique_text_3, ['b', 'm', 'g'], 'Scatter Plot (df_all_3)')
 
 # SVC_KERNELS_X3_ALL_T3
-svc_kernels(X_all_3c, y_all_3.values, y_all_unique_text_3, ['b', 'm', 'g'],
+_ = svc_kernels(X_all_3c, y_all_3.values, y_all_unique_text_3, ['b', 'm', 'g'],
             ml.get_models(ml.SVC_KERNELS, '_X3_ALL_T3'), 
             ml.get_multiclass_scorers(), 
             replace=False)
@@ -891,7 +900,7 @@ svc_kernels(X_all_3c, y_all_3.values, y_all_unique_text_3, ['b', 'm', 'g'],
 X_all_minc, _ = show_linear_transform_table(minc_x_all, X_all)
 
 # SVC_KERNELS_MINC_ALL_T3
-svc_kernels(X_all_minc, y_all_3.values, y_all_unique_text_3, ['b', 'm', 'g'],
+_ = svc_kernels(X_all_minc, y_all_3.values, y_all_unique_text_3, ['b', 'm', 'g'],
             ml.get_models(ml.SVC_KERNELS, '_MINC_ALL_T3'), 
             ml.get_multiclass_scorers(), 
             replace=False)
@@ -907,16 +916,42 @@ _ = models(X_all, y_all_3.values, y_all_unique_text_3,
        ml.get_multiclass_scorers(), 
        replace=False)
 
+# # Test sul set di dati del sesso opposto
 
+# ## Modelli Dei Topi Maschio
 
+# ### Target Binario (no stress/stress)
 
+# #### PCA 2
 
+show_scores(svc_kernels_x2_males_t2, pd.DataFrame(X_females_2c), y_females_2)
 
+show_scores(models_x2_males_t2, pd.DataFrame(X_females_2c), y_females_2)
 
+show_scores(svc_kernels_x2_males_t2_modified, pd.DataFrame(X_females_2c), y_females_2)
 
+show_scores(models_x2_males_t2_modified, pd.DataFrame(X_females_2c), y_females_2)
 
+# #### Senza PCA
 
+show_scores(learned_models_x_males_t2, X_females, y_females_2)
 
+# ## Modello Dei Topi Femmina
 
+# ### Target Binario (no stress/stress)
+
+# #### PCA 2
+
+show_scores(svc_kernels_x2_females_t2, pd.DataFrame(X_males_2c), y_males_2)
+
+show_scores(models_x2_females_t2, pd.DataFrame(X_males_2c), y_males_2)
+
+show_scores(svc_kernels_x2_females_t2_modified, pd.DataFrame(X_males_2c), y_males_2)
+
+show_scores(models_x2_females_t2_modified, pd.DataFrame(X_males_2c), y_males_2)
+
+# #### Senza PCA
+
+show_scores(learned_models_x_females_t2, X_males, y_males_2)
 
 
