@@ -18,11 +18,10 @@ for module in [ml, visualize]:
 
 
 # +
-# fare test dataset maschi modello femmine
-# fare test femmine modello maschi
+# fare test dataset maschi modello femmine (pca 2 e set completo, stress/no stress)
+# fare test femmine modello maschi (pca 2 e set completo, stress/no stress)
 # knn pca 2 comp e dataset intero (k=1,3,5)
 # tabella alberi feature e profondità, e mostrare alberi delle foreste
-# rieseguire tutti i modelli
 # -
 
 # # Util
@@ -83,6 +82,8 @@ def models(X, y, y_unique_text, models, test_scorers,
     for learned_model in learned_models:
         if(learned_model['model'].named_steps['classifier'].__class__.__name__ == 'DecisionTreeClassifier'):
             visualize.plot_tree(X.columns, y_unique_text, learned_model['model'].named_steps['classifier'], learned_model['model_name'])
+
+    return learned_models
 
 
 def show_linear_transform_table(n_components, X):
@@ -186,7 +187,7 @@ svc_kernels(X_males_2c, y_males_2.values, y_males_unique_text_2, ['b', 'm'],
             replace=False)
 
 # DECISIONTREECLASSIFIER_X2_MALES_T2
-models(pd.DataFrame(X_males_2c, columns=[f"Cmp_{i}" for i in range(X_males_2c.shape[1])]), 
+_ = models(pd.DataFrame(X_males_2c, columns=[f"Cmp_{i}" for i in range(X_males_2c.shape[1])]), 
        y_males_2.values, y_males_unique_text_2, 
        ml.get_models(ml.DECISIONTREE, '_X2_MALES_T2'), 
        ml.get_binary_scorers())
@@ -199,6 +200,7 @@ X_males_2c_modified = np.array([
     [float(sum(linear_trasformation_males[0]*row)), float(sum(linear_trasformation_males[1]*row))] 
     for row in StandardScaler().fit_transform(X_males.values)
 ])
+display(pd.DataFrame(linear_trasformation_males, columns=X_males.columns, index=[f'Cmp {i+1}' for i in range(len(linear_trasformation_males))]))
 
 # Scatter Plot
 visualize.show_scatter_plot(X_males_2c_modified, y_males_2, y_males_unique_text_2, ['b', 'm'], 'PCA - Scatter Plot (df_males_2_modified)')
@@ -213,7 +215,7 @@ svc_kernels(X_males_2c_modified, y_males_2.values, y_males_unique_text_2, ['b', 
             replace=False)
 
 # DECISIONTREECLASSIFIER_X2_MODIFIED_MALES_T2
-models(pd.DataFrame(X_males_2c_modified, columns=[f"Cmp_{i}" for i in range(X_males_2c_modified.shape[1])]), 
+_ = models(pd.DataFrame(X_males_2c_modified, columns=[f"Cmp_{i}" for i in range(X_males_2c_modified.shape[1])]), 
        y_males_2.values, y_males_unique_text_2, 
        ml.get_models(ml.DECISIONTREE, '_X2_MALES_T2'), 
        ml.get_binary_scorers())
@@ -249,10 +251,10 @@ svc_kernels(X_males_minc, y_males_2.values, y_males_unique_text_2, ['b', 'm'],
 visualize.show_cluster_table(2, StandardScaler().fit_transform(X_males), y_males_2, y_males_unique_text_2, 'df_males_2')
 
 # MODELS_X_MALES_T2
-models(X_males, y_males_2.values, y_males_unique_text_2,
-       ml.get_custom_models('_X_MALES_T2', 13),
-       ml.get_binary_scorers(), 
-       replace=False)
+learned_models_x_males_t2 = models(X_males, y_males_2.values, y_males_unique_text_2,
+                                   ml.get_custom_models('_X_MALES_T2', 13),
+                                   ml.get_binary_scorers(), 
+                                   replace=False)
 
 # ### Target Binario (stress vulnerabile/stress resiliente)
 
@@ -304,7 +306,7 @@ svc_kernels(X_males_stress_minc, y_males_stress.values, y_males_unique_text_stre
 visualize.show_cluster_table(2, StandardScaler().fit_transform(X_males_stress), y_males_stress, y_males_unique_text_stress, 'df_males_stress')
 
 # MODELS_X_MALES_STRESS
-models(X_males_stress, y_males_stress.values, y_males_unique_text_stress,
+_ = models(X_males_stress, y_males_stress.values, y_males_unique_text_stress,
        ml.get_custom_models('_X_MALES_STRESS', 9),
        ml.get_binary_scorers(), 
        replace=False)
@@ -359,7 +361,7 @@ svc_kernels(X_males_minc, y_males_3.values, y_males_unique_text_3, ['b', 'm', 'g
 visualize.show_cluster_table(3, StandardScaler().fit_transform(X_males), y_males_3, y_males_unique_text_3, 'df_males_3')
 
 # MODELS_X_MALES_T3
-models(X_males, y_males_3.values, y_males_unique_text_3,  
+_ = models(X_males, y_males_3.values, y_males_unique_text_3,  
        ml.get_custom_models('_X_MALES_T3', 13),
        ml.get_multiclass_scorers(), 
        replace=False)
@@ -458,7 +460,7 @@ svc_kernels(X_females_2c, y_females_2.values, y_females_unique_text_2, ['b', 'm'
             replace=False)
 
 # DECISIONTREECLASSIFIER_X2_FEMALES_T2
-models(pd.DataFrame(X_females_2c, columns=[f"Cmp_{i}" for i in range(X_females_2c.shape[1])]), 
+_ = models(pd.DataFrame(X_females_2c, columns=[f"Cmp_{i}" for i in range(X_females_2c.shape[1])]), 
        y_females_2.values, y_females_unique_text_2, 
        ml.get_models(ml.DECISIONTREE, '_X2_FEMALES_T2'), 
        ml.get_binary_scorers())
@@ -471,6 +473,7 @@ X_females_2c_modified = np.array([
     [float(sum(linear_trasformation_females[0]*row)), float(sum(linear_trasformation_females[1]*row))] 
     for row in StandardScaler().fit_transform(X_females.values)
 ])
+display(pd.DataFrame(linear_trasformation_females, columns=X_females.columns, index=[f'Cmp {i+1}' for i in range(len(linear_trasformation_females))]))
 
 # Scatter Plot
 visualize.show_scatter_plot(X_females_2c_modified, y_females_2, y_females_unique_text_2, ['b', 'm'], 'PCA - Scatter Plot (df_females_2_modified)')
@@ -485,7 +488,7 @@ svc_kernels(X_females_2c_modified, y_females_2.values, y_females_unique_text_2, 
             replace=False)
 
 # DECISIONTREECLASSIFIER_X2_MODIFIED_FEMALES_T2
-models(pd.DataFrame(X_females_2c, columns=[f"Cmp_{i}" for i in range(X_females_2c.shape[1])]), 
+_ = models(pd.DataFrame(X_females_2c, columns=[f"Cmp_{i}" for i in range(X_females_2c.shape[1])]), 
        y_females_2.values, y_females_unique_text_2, 
        ml.get_models(ml.DECISIONTREE, '_X2_MODIFIED_FEMALES_T2'), 
        ml.get_binary_scorers())
@@ -520,11 +523,14 @@ svc_kernels(X_females_minc, y_females_2.values, y_females_unique_text_2, ['b', '
 # K-Means_X_FEMALES_T2
 visualize.show_cluster_table(2, StandardScaler().fit_transform(X_females), y_females_2, y_females_unique_text_2, 'df_females_2')
 
+# +
 # MODELS_X_FEMALES_T2
-models(X_females, y_females_2.values, y_females_unique_text_2, 
-       ml.get_custom_models('_X_FEMALES_T2', 13),
-       ml.get_binary_scorers(), 
-       replace=False)
+
+learned_models_x_females_t2 = models(X_females, y_females_2.values, y_females_unique_text_2, 
+                                    ml.get_custom_models('_X_FEMALES_T2', 13),
+                                    ml.get_binary_scorers(), 
+                                    replace=False)
+# -
 
 # ### Target Binario (stress vulnerabile/stress resiliente)
 
@@ -576,7 +582,7 @@ svc_kernels(X_females_stress_minc, y_females_stress.values, y_females_unique_tex
 visualize.show_cluster_table(2, StandardScaler().fit_transform(X_females_stress), y_females_stress, y_females_unique_text_stress, 'df_females_stress')
 
 # MODELS_X_FEMALES_STRESS
-models(X_females_stress, y_females_stress.values, y_females_unique_text_stress,
+_ = models(X_females_stress, y_females_stress.values, y_females_unique_text_stress,
        ml.get_custom_models('_X_FEMALES_STRESS', 9),
        ml.get_binary_scorers(), 
        replace=False)
@@ -631,7 +637,7 @@ svc_kernels(X_females_minc, y_females_3.values, y_females_unique_text_3, ['b', '
 visualize.show_cluster_table(3, StandardScaler().fit_transform(X_females), y_females_3, y_females_unique_text_3, 'df_females_3')
 
 # MODELS_X_FEMALES_T3
-models(X_females, y_females_3.values, y_females_unique_text_3,
+_ = models(X_females, y_females_3.values, y_females_unique_text_3,
        ml.get_custom_models('_X_FEMALES_T3', 13), 
        ml.get_multiclass_scorers(), 
        replace=False)
@@ -722,7 +728,7 @@ svc_kernels(X_all_2c, y_all_2.values, y_all_unique_text_2, ['b', 'm'],
             replace=False)
 
 # DECISIONTREECLASSIFIER_X2_ALL_T2
-models(pd.DataFrame(X_all_2c, columns=[f"Cmp_{i}" for i in range(X_all_2c.shape[1])]), 
+_ = models(pd.DataFrame(X_all_2c, columns=[f"Cmp_{i}" for i in range(X_all_2c.shape[1])]), 
        y_all_2.values, y_all_unique_text_2, 
        ml.get_models(ml.DECISIONTREE, '_X2_ALL_T2'), 
        ml.get_binary_scorers())
@@ -735,6 +741,7 @@ X_all_2c_modified = np.array([
     [float(sum(linear_trasformation_all[0]*row)), float(sum(linear_trasformation_all[1]*row))] 
     for row in StandardScaler().fit_transform(X_all.values)
 ])
+display(pd.DataFrame(linear_trasformation_all, columns=X_all.columns, index=[f'Cmp {i+1}' for i in range(len(linear_trasformation_all))]))
 
 # Scatter Plot
 visualize.show_scatter_plot(X_all_2c_modified, y_all_2, y_all_unique_text_2, ['b', 'm'], 'PCA - Scatter Plot (df_all_2_modified)')
@@ -749,7 +756,7 @@ svc_kernels(X_all_2c_modified, y_all_2.values, y_all_unique_text_2, ['b', 'm'],
             replace=False)
 
 # DECISIONTREECLASSIFIER_X2_MODIFIED_ALL_T2
-models(pd.DataFrame(X_all_2c_modified, columns=[f"Cmp_{i}" for i in range(X_all_2c.shape[1])]), 
+_ = models(pd.DataFrame(X_all_2c_modified, columns=[f"Cmp_{i}" for i in range(X_all_2c.shape[1])]), 
        y_all_2.values, y_all_unique_text_2, 
        ml.get_models(ml.DECISIONTREE, '_X2_MODIFIED_ALL_T2'), 
        ml.get_binary_scorers())
@@ -785,7 +792,7 @@ svc_kernels(X_all_minc, y_all_2.values, y_all_unique_text_2, ['b', 'm'],
 visualize.show_cluster_table(2, StandardScaler().fit_transform(X_all), y_all_2, y_all_unique_text_2, 'df_all_2')
 
 # MODELS_X_ALL_T2
-models(X_all, y_all_2.values, y_all_unique_text_2,
+_ = models(X_all, y_all_2.values, y_all_unique_text_2,
        ml.get_custom_models('_X_ALL_T2', 25), 
        ml.get_binary_scorers(), 
        replace=False)
@@ -840,7 +847,7 @@ svc_kernels(X_all_stress_minc, y_all_stress.values, y_all_unique_text_stress, ['
 visualize.show_cluster_table(2, StandardScaler().fit_transform(X_all_stress), y_all_stress, y_all_unique_text_stress, 'df_all_stress')
 
 # MODELS_X_ALL_STRESS
-models(X_all_stress, y_all_stress.values, y_all_unique_text_stress,
+_ = models(X_all_stress, y_all_stress.values, y_all_unique_text_stress,
        ml.get_custom_models('_X_ALL_STRESS', 17), 
        ml.get_binary_scorers(), 
        replace=False)
@@ -895,7 +902,7 @@ svc_kernels(X_all_minc, y_all_3.values, y_all_unique_text_3, ['b', 'm', 'g'],
 visualize.show_cluster_table(3, StandardScaler().fit_transform(X_all), y_all_3, y_all_unique_text_3, 'df_all_3')
 
 # MODELS_X_ALL_T3
-models(X_all, y_all_3.values, y_all_unique_text_3,
+_ = models(X_all, y_all_3.values, y_all_unique_text_3,
        ml.get_custom_models('_X_ALL_T3', 25),
        ml.get_multiclass_scorers(), 
        replace=False)
