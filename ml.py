@@ -60,16 +60,28 @@ PCA_MODELS = [
         }
     },
     {
-    'model': DecisionTreeClassifier(random_state=RANDOM_STATE),
-    'name': 'DecisionTreeClassifier',
-    'param_grid': {
-        'criterion': ['gini', 'entropy', 'log_loss'],
-        'splitter': ['best', 'random'],
-        'max_depth': [None, 1, 2, 3, 4, 5, 10, 15, 20],
-        'min_samples_split': [0.01, 0.05, 0.1, 0.2, 0.3],
-        'min_samples_leaf': [1, 0.05, 0.1, 0.2, 0.3]
+        'model': DecisionTreeClassifier(random_state=RANDOM_STATE),
+        'name': 'DecisionTreeClassifier',
+        'param_grid': {
+            'criterion': ['gini', 'entropy', 'log_loss'],
+            'splitter': ['best', 'random'],
+            'max_depth': [None, 1, 2, 3, 4, 5, 10, 15, 20],
+            'min_samples_split': [0.01, 0.05, 0.1, 0.2, 0.3],
+            'min_samples_leaf': [1, 0.05, 0.1, 0.2, 0.3]
+        }
+    },
+    {
+        'model': RandomForestClassifier(random_state=RANDOM_STATE),
+        'name': 'RandomForestClassifier',
+        'param_grid':
+        {
+            'n_estimators': [3, 5, 7],
+            'criterion': ['gini', 'entropy', 'log_loss'],
+            'max_depth': [None, 1, 2, 3, 4, 5, 10, 15, 20],
+            'min_samples_split': [0.01, 0.05, 0.1, 0.2, 0.3],
+            'min_samples_leaf': [1, 0.05, 0.1, 0.2, 0.3]
+        }
     }
-}
 ]
 
 MODELS = [
@@ -106,7 +118,7 @@ MODELS = [
         }
     },
     {
-        'model': RandomForestClassifier(bootstrap=False, random_state=RANDOM_STATE),
+        'model': RandomForestClassifier(random_state=RANDOM_STATE),
         'name': 'RandomForestClassifier',
         'param_grid':
         {
@@ -123,7 +135,7 @@ def get_binary_scorers():
     specificity_scorer = lambda y_true, y_pred: metrics.recall_score(y_true, y_pred, pos_label=0)
     specificity_scorer.__name__ = 'specificity_scorer'
 
-    precision_scorer = lambda y_true, y_pred: metrics.precision_score(y_true, y_pred, zero_division=1)
+    precision_scorer = lambda y_true, y_pred: metrics.precision_score(y_true, y_pred, zero_division=0)
     precision_scorer.__name__ = 'precision_scorer'
     
     return [

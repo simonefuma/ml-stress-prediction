@@ -9,6 +9,8 @@ from sklearn.cluster import KMeans
 from sklearn.inspection import DecisionBoundaryDisplay
 from sklearn.tree import plot_tree as sklearn_plot_tree
 
+from matplotlib.lines import Line2D
+
 def get_custom_lines(y_text, colors):
     return [plt.Line2D([0], [0], marker='o', color='w', label=y_text[i], markerfacecolor=colors[i], markersize=10) for i in range(len(y_text))]
 
@@ -47,18 +49,29 @@ def show_cumulative_explained_variance(explained_variance, title):
     plt.show()
 
 
-def show_scatter_plot(X, y, y_text, colors, title):
+def show_scatter_plot(X, y, y_text, colors, title, gender):
     plt.figure(figsize=(8, 6))
     
-    plt.scatter(X[:, 0], X[:, 1], c=y, cmap=ListedColormap(colors), edgecolor='k', s=150)
+    # Creazione dello scatter plot con marker differenti per sesso
+    for i, (shape, label) in enumerate(zip(['o', '^'], ['Male', 'Female'])):
+        gender_mask = (gender == i)
+        plt.scatter(X[gender_mask, 0], X[gender_mask, 1], 
+                    c=y[gender_mask], 
+                    cmap=ListedColormap(colors), 
+                    edgecolor='k', 
+                    s=150, 
+                    marker=shape, 
+                    label=label)
 
     custom_lines = get_custom_lines(y_text, colors)
 
-    plt.legend(handles=custom_lines)
+    # Aggiunta delle legende personalizzate
+    plt.legend(handles=custom_lines + 
+               [Line2D([0], [0], color='k', lw=0, marker='o', markersize=10, label='Male'),
+                Line2D([0], [0], color='k', lw=0, marker='^', markersize=10, label='Female')])
     plt.title(title)
     plt.xlabel('PCA Component 1')
     plt.ylabel('PCA Component 2')
-    plt.legend(handles=custom_lines)
     plt.show()
 
 
@@ -85,11 +98,11 @@ def show_3D_scatter_plot(X, y, y_text, colors, title):
     plt.show()
 
 
-def show_cluster_plot(k, X, y, y_text, colors, title):
+def show_cluster_plot(k, X, y, y_text, colors, title, gender):
     kmeans = KMeans(n_clusters=k, random_state=RANDOM_STATE)
     predicts = kmeans.fit_predict(X)
-    centroids = kmeans.cluster_centers_;
-
+    centroids = kmeans.cluster_centers_
+    
     x_min, x_max = X[:, 0].min() - 5, X[:, 0].max() + 5
     y_min, y_max = X[:, 1].min() - 5, X[:, 1].max() + 5
     xx, yy = np.meshgrid(np.linspace(x_min, x_max, 1000), np.linspace(y_min, y_max, 1000))
@@ -102,28 +115,38 @@ def show_cluster_plot(k, X, y, y_text, colors, title):
     plt.xlim(x_min, x_max)
     plt.ylim(y_min, y_max)
 
-    custom_lines = get_custom_lines(y_text, colors)
+    # Disegna i punti con marker differenti in base al genere
+    for i, (shape, label) in enumerate(zip(['o', '^'], ['Male', 'Female'])):
+        gender_mask = (gender == i)
+        plt.scatter(X[gender_mask, 0], X[gender_mask, 1], 
+                    c=y[gender_mask], 
+                    cmap=ListedColormap(colors), 
+                    edgecolor='k', 
+                    s=150, 
+                    marker=shape, 
+                    label=label)
     
-    custom_lines.append(plt.Line2D([0], [0], 
-                               marker='.', 
-                               color='w', 
-                               label='Centroids', 
-                               markerfacecolor='k', 
-                               markersize=10))
-    
-    plt.scatter(X[:, 0], X[:, 1], c=y, cmap=ListedColormap(colors), edgecolor='k', s=150)
+    # Aggiunge i centroidi
+    plt.scatter(centroids[:, 0], centroids[:, 1], c='k', marker='x', s=200, label='Centroids')
 
-    plt.scatter(centroids[:, 0], centroids[:, 1], c='k', marker='.', edgecolor='k', s=150)
+    # Aggiunge la leggenda
+    custom_lines = get_custom_lines(y_text, colors)
+    custom_lines.extend([
+        Line2D([0], [0], color='k', lw=0, marker='o', markersize=10, label='Male'),
+        Line2D([0], [0], color='k', lw=0, marker='^', markersize=10, label='Female'),
+        Line2D([0], [0], color='k', lw=0, marker='x', markersize=10, label='Centroids')
+    ])
+    
     plt.legend(handles=custom_lines)
     plt.title(title)
     plt.show()
 
 
-def show_svc_decision_boundary(X, y, y_text, models, colors):
-    fig, axes = plt.subplots(1, 3, figsize=(18, 6))
+def show_svc_decision_boundary(X, y, y_text, models, colors, gender):
+    fig, axes = plt.subplots(1, len(models), figsize=(6 * len(models), 6))
     
     for i, model in enumerate(models):
-        ax = axes[i]
+        ax = axes[i] if len(models) > 1 else axes
 
         h = 0.02
         x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
@@ -138,11 +161,28 @@ def show_svc_decision_boundary(X, y, y_text, models, colors):
         Z = model['model'].predict(grid)
         Z = Z.reshape(xx.shape)
 
+        # Disegna il contorno delle regioni
         ax.contourf(xx, yy, Z, alpha=0.3, cmap=ListedColormap(colors))
-        ax.scatter(X[:, 0], X[:, 1], c=y, cmap=ListedColormap(colors), s=50, edgecolor='k', label=y_text)
+
+        # Disegna i punti con marker differenti per genere
+        for j, (shape, label) in enumerate(zip(['o', '^'], ['Male', 'Female'])):
+            gender_mask = (gender == j)
+            ax.scatter(X[gender_mask, 0], X[gender_mask, 1], 
+                       c=y[gender_mask], 
+                       cmap=ListedColormap(colors), 
+                       edgecolor='k', 
+                       s=50, 
+                       marker=shape, 
+                       label=label)
+
         ax.set_title(model['model_name'])
         
+        # Aggiunge legende personalizzate
         custom_lines = get_custom_lines(y_text, colors)
+        custom_lines.extend([
+            Line2D([0], [0], color='k', lw=0, marker='o', markersize=10, label='Male'),
+            Line2D([0], [0], color='k', lw=0, marker='^', markersize=10, label='Female')
+        ])
         ax.legend(handles=custom_lines)
 
     plt.tight_layout()
@@ -176,7 +216,15 @@ def display_table(learned_models):
             scorer = result['scorer_name']
             df.loc[model_name, (scorer, 'avg')] = round(result['avg'], 3)
             df.loc[model_name, (scorer, 'std')] = round(result['std'], 3)
-
+    print(df.to_latex(
+                index=True,
+                multirow=True,
+                multicolumn_format="c",
+                caption="Risultati dei modelli SVC su dati X2_MALES_T2",
+                label="tab:svc_results",
+                float_format="%.3f",
+            ).replace("_", "\_")
+    )
     display(df)
 
 
