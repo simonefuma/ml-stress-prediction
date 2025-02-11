@@ -19,7 +19,8 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 
-SVC_KERNELS = [
+
+MODELS = [
     {
         'model': SVC(kernel='linear'),
         'name': 'SVC_linear',
@@ -46,10 +47,7 @@ SVC_KERNELS = [
             'C': [0.01, 0.1, 1, 10, 100],
             'gamma': ['scale', 'auto', 0.001, 0.01, 0.1, 1]
         }
-    }
-]
-
-PCA_MODELS = [
+    },
     {
         'model': KNeighborsClassifier(),
         'name': 'KNeighborsClassifier',
@@ -57,52 +55,6 @@ PCA_MODELS = [
         {
             'n_neighbors': [],
             'metric': ['cityblock', 'cosine', 'euclidean', 'l2', 'l1', 'manhattan', 'nan_euclidean']
-        }
-    },
-    {
-        'model': DecisionTreeClassifier(random_state=RANDOM_STATE),
-        'name': 'DecisionTreeClassifier',
-        'param_grid': {
-            'criterion': ['gini', 'entropy', 'log_loss'],
-            'splitter': ['best', 'random'],
-            'max_depth': [None, 1, 2, 3, 4, 5, 10, 15, 20],
-            'min_samples_split': [0.01, 0.05, 0.1, 0.2, 0.3],
-            'min_samples_leaf': [1, 0.05, 0.1, 0.2, 0.3]
-        }
-    },
-    {
-        'model': RandomForestClassifier(random_state=RANDOM_STATE),
-        'name': 'RandomForestClassifier',
-        'param_grid':
-        {
-            'n_estimators': [3, 5, 7],
-            'criterion': ['gini', 'entropy', 'log_loss'],
-            'max_depth': [None, 1, 2, 3, 4, 5, 10, 15, 20],
-            'min_samples_split': [0.01, 0.05, 0.1, 0.2, 0.3],
-            'min_samples_leaf': [1, 0.05, 0.1, 0.2, 0.3]
-        }
-    }
-]
-
-MODELS = [
-    {
-        'model': KNeighborsClassifier(),
-        'name': 'KNeighborsClassifier',
-        'param_grid': 
-        {
-            'n_neighbors': [],
-            'metric': ['cityblock', 'cosine', 'euclidean', 'l2', 'l1', 'manhattan', 'nan_euclidean']
-        }
-    },
-    {
-        'model': SVC(),
-        'name': 'SVC',
-        'param_grid':
-        {
-            'C': [0.01, 0.1, 1, 10, 100],
-            'kernel': ['linear', 'poly', 'rbf', 'sigmoid'],
-            'degree': [2, 3, 4, 5],
-            'gamma': ['scale', 'auto', 0.001, 0.01, 0.1, 1]
         }
     },
     {
@@ -160,16 +112,15 @@ def get_multiclass_scorers():
     multiclass_scorers.append(specificity_score)
     return multiclass_scorers
 
-def get_custom_models(models, postfix, n):
-    models = get_models(models, postfix)
-    models[0]['param_grid']['n_neighbors'] = [i for i in range(1, n, 2)]
-    return models
-
-def get_models(models, postfix):
-    return [{'model': model['model'], 
+def get_models(postfix, n):
+    models = [{'model': model['model'], 
              'name': model['name']+postfix, 
              'param_grid': model['param_grid']} 
-            for model in models]
+            for model in MODELS]
+    knn_index = next((i for i, model in enumerate(models) if "KNeighborsClassifier" in model['name']), None)
+    if knn_index is not None:
+        models[knn_index]['param_grid']['n_neighbors'] = [i for i in range(1, n, 2)]
+    return models
     
 
 def np_jsonify(data):

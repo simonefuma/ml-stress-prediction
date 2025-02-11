@@ -1,0 +1,1 @@
+2024-12-16 16:08:15,605 > [{"scorer_name": "accuracy_score", "avg": 0.5625, "std": 0.125}, {"scorer_name": "f1_score", "avg": 0.575, "std": 0.15000000000000002}, {"scorer_name": "precision_scorer", "avg": 0.5416666666666666, "std": 0.08333333333333331}, {"scorer_name": "recall_score", "avg": 0.625, "std": 0.25}, {"scorer_name": "specificity_scorer", "avg": 0.5, "std": 0.0}]

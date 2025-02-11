@@ -52,7 +52,6 @@ def show_cumulative_explained_variance(explained_variance, title):
 def show_scatter_plot(X, y, y_text, colors, title, gender):
     plt.figure(figsize=(8, 6))
     
-    # Creazione dello scatter plot con marker differenti per sesso
     for i, (shape, label) in enumerate(zip(['o', '^'], ['Male', 'Female'])):
         gender_mask = (gender == i)
         plt.scatter(X[gender_mask, 0], X[gender_mask, 1], 
@@ -65,7 +64,6 @@ def show_scatter_plot(X, y, y_text, colors, title, gender):
 
     custom_lines = get_custom_lines(y_text, colors)
 
-    # Aggiunta delle legende personalizzate
     plt.legend(handles=custom_lines + 
                [Line2D([0], [0], color='k', lw=0, marker='o', markersize=10, label='Male'),
                 Line2D([0], [0], color='k', lw=0, marker='^', markersize=10, label='Female')])
@@ -115,7 +113,6 @@ def show_cluster_plot(k, X, y, y_text, colors, title, gender):
     plt.xlim(x_min, x_max)
     plt.ylim(y_min, y_max)
 
-    # Disegna i punti con marker differenti in base al genere
     for i, (shape, label) in enumerate(zip(['o', '^'], ['Male', 'Female'])):
         gender_mask = (gender == i)
         plt.scatter(X[gender_mask, 0], X[gender_mask, 1], 
@@ -126,10 +123,8 @@ def show_cluster_plot(k, X, y, y_text, colors, title, gender):
                     marker=shape, 
                     label=label)
     
-    # Aggiunge i centroidi
     plt.scatter(centroids[:, 0], centroids[:, 1], c='k', marker='x', s=200, label='Centroids')
 
-    # Aggiunge la leggenda
     custom_lines = get_custom_lines(y_text, colors)
     custom_lines.extend([
         Line2D([0], [0], color='k', lw=0, marker='o', markersize=10, label='Male'),
@@ -153,18 +148,11 @@ def show_svc_decision_boundary(X, y, y_text, models, colors, gender):
         y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
         xx, yy = np.meshgrid(np.arange(x_min, x_max, h), np.arange(y_min, y_max, h))
 
-        grid = np.c_[xx.ravel(), yy.ravel()]
-        if X.shape[1] > 2:
-            extra_dims = np.zeros((grid.shape[0], X.shape[1] - 2))
-            grid = np.hstack([grid, extra_dims])
-
-        Z = model['model'].predict(grid)
+        Z = model['model'].predict(np.c_[xx.ravel(), yy.ravel()])
         Z = Z.reshape(xx.shape)
 
-        # Disegna il contorno delle regioni
         ax.contourf(xx, yy, Z, alpha=0.3, cmap=ListedColormap(colors))
 
-        # Disegna i punti con marker differenti per genere
         for j, (shape, label) in enumerate(zip(['o', '^'], ['Male', 'Female'])):
             gender_mask = (gender == j)
             ax.scatter(X[gender_mask, 0], X[gender_mask, 1], 
@@ -177,7 +165,6 @@ def show_svc_decision_boundary(X, y, y_text, models, colors, gender):
 
         ax.set_title(model['model_name'])
         
-        # Aggiunge legende personalizzate
         custom_lines = get_custom_lines(y_text, colors)
         custom_lines.extend([
             Line2D([0], [0], color='k', lw=0, marker='o', markersize=10, label='Male'),
@@ -202,6 +189,28 @@ def show_cluster_table(k, X, y, y_text, title):
 
     display(cluster_table)
 
+def print_table_latex(df):
+    formatted_df = df.copy()
+    for col in df.columns.levels[0]:
+        col_max = df[(col, "avg")].max()
+        formatted_df[(col, "avg")] = df[(col, "avg")].apply(
+            lambda x: f"\\textbf{{{x:.3f}}}" if x == col_max else f"{x:.3f}"
+        )
+        col_min = df[(col, "std")].min()
+        formatted_df[(col, "std")] = df[(col, "std")].apply(
+            lambda x: f"\\textbf{{{x:.3f}}}" if x == col_min else f"{x:.3f}"
+        )
+    
+    latex_code = formatted_df.to_latex(
+        index=True,
+        multirow=True,
+        multicolumn_format="c",
+        caption="Risultati dei modelli",
+        label="tab:",
+        escape=False
+    )
+    
+    print(latex_code)
 
 def display_table(learned_models):
     scorers = [result['scorer_name'] for result in learned_models[0]['result']]
@@ -216,15 +225,7 @@ def display_table(learned_models):
             scorer = result['scorer_name']
             df.loc[model_name, (scorer, 'avg')] = round(result['avg'], 3)
             df.loc[model_name, (scorer, 'std')] = round(result['std'], 3)
-    print(df.to_latex(
-                index=True,
-                multirow=True,
-                multicolumn_format="c",
-                caption="Risultati dei modelli SVC su dati X2_MALES_T2",
-                label="tab:svc_results",
-                float_format="%.3f",
-            ).replace("_", "\_")
-    )
+    print_table_latex(df)
     display(df)
 
 
@@ -242,9 +243,12 @@ def plot_tree(columns, y_text, learned_model, title):
     sklearn_plot_tree(learned_model, feature_names=columns, class_names=y_text, filled=True)
     plt.title(title)
     plt.show()
-    
+
     usage = ["x" if importance > 0 else "-" for importance in learned_model.feature_importances_]
-    display(pd.DataFrame([usage + [learned_model.get_depth()]], columns=list(columns.values) + ["Depth"], index=[title]))
+    display(pd.DataFrame([usage + [learned_model.get_depth()]], columns=list(columns) + ["Depth"], index=[title]))
+
+    latex_code = pd.DataFrame([usage + [learned_model.get_depth()]], columns=list(columns) + ["Depth"], index=[title]).to_latex()
+    print(latex_code)
 
 
 def plot_forest(columns, y_text, learned_model, title):
@@ -258,4 +262,7 @@ def plot_forest(columns, y_text, learned_model, title):
 
         usages.append(["x" if importance > 0 else "-" for importance in tree.feature_importances_] + [tree.get_depth()])
         indexs.append(f'{title}_{i}')
-    display(pd.DataFrame(usages, columns=list(columns.values) + ["Depth"], index=indexs))
+    display(pd.DataFrame(usages, columns=list(columns) + ["Depth"], index=indexs))
+
+    latex_code = pd.DataFrame(usages, columns=list(columns) + ["Depth"], index=indexs).to_latex()
+    print(latex_code)
